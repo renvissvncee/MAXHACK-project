@@ -1,0 +1,58 @@
+.stack {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--nav-height) + 16px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: calc(var(--page-max-width) - 32px);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: 14px;
+  line-height: 1.35;
+  animation: fadeInUp 0.2s ease;
+}
+
+.toast[data-variant="success"] svg {
+  color: #4ade80;
+  flex-shrink: 0;
+}
+
+.toast[data-variant="info"] svg {
+  color: #93c5fd;
+  flex-shrink: 0;
+}
+
+.toast span {
+  flex: 1;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  padding: 2px;
+  display: flex;
+  cursor: pointer;
+}
+
+.close:hover {
+  opacity: 1;
+}

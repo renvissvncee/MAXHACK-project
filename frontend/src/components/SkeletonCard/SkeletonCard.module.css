@@ -1,0 +1,56 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.photo {
+  height: 152px;
+  background: var(--skeleton-base);
+}
+
+.photo,
+.line,
+.tag {
+  background-image: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.line {
+  height: 10px;
+  border-radius: 6px;
+}
+
+.title {
+  width: 70%;
+  height: 13px;
+}
+
+.meta {
+  width: 50%;
+}
+
+.text {
+  width: 90%;
+}
+
+.tagsRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tag {
+  width: 60px;
+  height: 22px;
+  border-radius: var(--radius-full);
+}

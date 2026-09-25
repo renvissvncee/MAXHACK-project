@@ -1,0 +1,20 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  padding: 4px 10px 4px 8px;
+  white-space: nowrap;
+}
+
+.badge[data-size="md"] {
+  font-size: 12.5px;
+}
+
+.badge[data-size="sm"] {
+  font-size: 11px;
+  padding: 3px 8px 3px 6px;
+}

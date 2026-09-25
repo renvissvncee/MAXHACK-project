@@ -1,0 +1,24 @@
+.gradient-violet {
+  background: linear-gradient(135deg, #a78bfa 0%, #5b21b6 100%);
+}
+.gradient-sunset {
+  background: linear-gradient(135deg, #fb923c 0%, #db2777 100%);
+}
+.gradient-amber {
+  background: linear-gradient(135deg, #fcd34d 0%, #f97316 100%);
+}
+.gradient-ocean {
+  background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
+}
+.gradient-forest {
+  background: linear-gradient(135deg, #4ade80 0%, #15803d 100%);
+}
+.gradient-mint {
+  background: linear-gradient(135deg, #5eead4 0%, #0d9488 100%);
+}
+.gradient-rose {
+  background: linear-gradient(135deg, #fda4af 0%, #be123c 100%);
+}
+.gradient-midnight {
+  background: linear-gradient(135deg, #818cf8 0%, #1e1b4b 100%);
+}

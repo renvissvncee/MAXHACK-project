@@ -1,0 +1,15 @@
+# Local Claude Code tooling (dev-server launch config, not shared project config)
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Env files
+.env
+.env.local

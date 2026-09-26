@@ -13,3 +13,14 @@ Thumbs.db
 # Env files
 .env
 .env.local
+
+# Python and local secrets
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env.*
+!.env.example
+
+# Local polling cursor
+.state/

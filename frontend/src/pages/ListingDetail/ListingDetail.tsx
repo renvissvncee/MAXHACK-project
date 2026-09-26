@@ -15,7 +15,6 @@ import BottomSheet from "../../components/BottomSheet/BottomSheet";
 import Button from "../../components/Button/Button";
 import PhotoPlaceholder from "../../components/PhotoPlaceholder/PhotoPlaceholder";
 import RatingStars from "../../components/RatingStars/RatingStars";
-import VerifiedBadge from "../../components/Badge/Badge";
 import StateView from "../../components/StateView/StateView";
 import Tag from "../../components/Tag/Tag";
 import { useToast } from "../../context/ToastContext";
@@ -160,8 +159,6 @@ export default function ListingDetail() {
             <RatingStars rating={listing.rating} reviewsCount={listing.reviewsCount} />
           </div>
 
-          {listing.verified && <VerifiedBadge />}
-
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Описание</h2>
             <p className={styles.paragraph}>{listing.description}</p>
@@ -184,7 +181,6 @@ export default function ListingDetail() {
               <div className={styles.hostInfo}>
                 <div className={styles.hostNameRow}>
                   <strong>{listing.host.name}</strong>
-                  {listing.host.verified && <VerifiedBadge size="sm" />}
                 </div>
                 <RatingStars rating={listing.host.rating} reviewsCount={listing.host.reviewsCount} size={12} />
                 <p className={styles.hostBio}>{listing.host.bio}</p>

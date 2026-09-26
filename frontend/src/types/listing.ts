@@ -5,7 +5,6 @@ export interface Host {
   name: string;
   avatarColor: string;
   avatarEmoji: string;
-  verified: boolean;
   rating: number;
   reviewsCount: number;
   bio: string;
@@ -23,7 +22,6 @@ export interface Listing {
   tags: string[];
   guests: number;
   accommodationType: AccommodationType;
-  verified: boolean;
   rating: number;
   reviewsCount: number;
   rules: string[];

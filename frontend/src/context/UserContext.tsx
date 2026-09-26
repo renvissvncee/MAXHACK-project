@@ -12,6 +12,7 @@ interface UserContextValue {
   completeOnboarding: (draft: UserProfileDraft) => Promise<UserProfile>;
   updateProfile: (patch: Partial<UserProfileDraft>) => Promise<UserProfile>;
   uploadProfilePhoto: (file: File) => Promise<string>;
+  logout: () => Promise<void>;
   resetDemoProfile: () => Promise<void>;
 }
 
@@ -61,6 +62,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const uploadProfilePhoto = useCallback((file: File) => userService.uploadProfilePhoto(file), []);
 
+  const logout = useCallback(() => userService.logout(), []);
+
   const resetDemoProfile = useCallback(async () => {
     await userService.resetDemoProfile();
     await load();
@@ -75,9 +78,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       updateProfile,
       uploadProfilePhoto,
+      logout,
       resetDemoProfile,
     }),
-    [user, status, isSaving, load, completeOnboarding, updateProfile, uploadProfilePhoto, resetDemoProfile],
+    [
+      user,
+      status,
+      isSaving,
+      load,
+      completeOnboarding,
+      updateProfile,
+      uploadProfilePhoto,
+      logout,
+      resetDemoProfile,
+    ],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

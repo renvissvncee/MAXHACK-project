@@ -11,5 +11,6 @@ export const userService = {
   updateProfile: (patch: Partial<UserProfileDraft>) => userRepository.updateProfile(patch),
   completeOnboarding: (draft: UserProfileDraft) => userRepository.completeOnboarding(draft),
   uploadProfilePhoto: (file: File) => userRepository.uploadProfilePhoto(file),
+  logout: () => userRepository.logout(),
   resetDemoProfile: () => userRepository.resetDemoProfile(),
 };

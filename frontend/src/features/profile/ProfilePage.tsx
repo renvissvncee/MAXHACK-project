@@ -1,22 +1,22 @@
-import { Home, Moon, PenSquare, RotateCcw, Sun } from "lucide-react";
+import { Home, LogOut, Moon, PenSquare, RotateCcw, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
 import BottomSheet from "../../components/BottomSheet/BottomSheet";
 import Button from "../../components/Button/Button";
 import StateView from "../../components/StateView/StateView";
-import VerifiedBadge from "../../components/Badge/Badge";
 import { useTheme } from "../../context/ThemeContext";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../context/UserContext";
 import { getInterestLabel } from "../../data/interests";
+import { clearIntroSeen } from "../onboarding/useIntroSeen";
 import type { UserProfileDraft } from "../../types/user";
 import ProfileFields from "./components/ProfileFields";
 import styles from "./ProfilePage.module.css";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, updateProfile, resetDemoProfile, isSaving } = useUser();
+  const { user, updateProfile, logout, resetDemoProfile, isSaving } = useUser();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
 
@@ -41,7 +41,13 @@ export default function ProfilePage() {
   const handleReset = async () => {
     setConfirmResetOpen(false);
     await resetDemoProfile();
-    navigate("/profile-setup", { replace: true });
+    clearIntroSeen();
+    navigate("/", { replace: true });
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    showToast("Вы вышли из аккаунта");
   };
 
   return (
@@ -50,11 +56,6 @@ export default function ProfilePage() {
         <Avatar photo={user.photo} name={user.name} size={72} />
         <h1 className={styles.name}>{user.name}</h1>
         <p className={styles.city}>{user.city}</p>
-        {user.verified ? (
-          <VerifiedBadge />
-        ) : (
-          <span className={styles.unverified}>Верификация не завершена</span>
-        )}
         {user.bio && <p className={styles.bio}>{user.bio}</p>}
         {user.interests.length > 0 && (
           <div className={styles.interests}>
@@ -105,6 +106,17 @@ export default function ProfilePage() {
         </p>
       </section>
 
+      <section className={styles.section}>
+        <div className={styles.settingsList}>
+          <button type="button" className={`${styles.settingRow} ${styles.danger}`} onClick={handleLogout}>
+            <span className={styles.settingLabel}>
+              <LogOut size={18} />
+              Выйти
+            </span>
+          </button>
+        </div>
+      </section>
+
       <BottomSheet
         open={editOpen}
         onClose={() => setEditOpen(false)}
@@ -134,8 +146,8 @@ export default function ProfilePage() {
         }
       >
         <p className={styles.confirmText}>
-          Локальные данные профиля будут удалены, и вы снова пройдёте экран «Расскажите о себе». Это полезно для
-          повторного тестирования сценария, реального аккаунта MAX это не затронет.
+          Локальные данные профиля будут удалены, и приложение откроется заново с онбординга — как при первом
+          запуске. Это полезно для повторного тестирования сценария, реального аккаунта MAX это не затронет.
         </p>
       </BottomSheet>
     </div>

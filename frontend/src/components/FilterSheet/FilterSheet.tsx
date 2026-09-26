@@ -1,4 +1,4 @@
-import { Minus, Plus, ShieldCheck } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { accommodationTypeLabels, type AccommodationType } from "../../types/listing";
 import type { SearchFormState } from "../../types/filters";
 import BottomSheet from "../BottomSheet/BottomSheet";
@@ -73,19 +73,6 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
           ))}
         </div>
       </div>
-
-      <button
-        type="button"
-        className={styles.verifiedToggle}
-        data-active={value.verifiedOnly || undefined}
-        onClick={() => onChange({ ...value, verifiedOnly: !value.verifiedOnly })}
-      >
-        <span className={styles.verifiedLabel}>
-          <ShieldCheck size={18} />
-          Только верифицированные хозяева
-        </span>
-        <span className={styles.switch} data-on={value.verifiedOnly || undefined} />
-      </button>
 
       <p className={styles.hint}>Даты и дополнительные фильтры — демо-заглушка для MVP.</p>
     </BottomSheet>

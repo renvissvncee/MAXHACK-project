@@ -17,7 +17,6 @@ const MAX_IDENTITY_SEED: UserProfile = {
   bio: "",
   interests: [],
   photo: null,
-  verified: true,
   onboardingCompleted: false,
 };
 
@@ -68,6 +67,12 @@ export class MockUserRepository implements UserRepository {
       reader.onerror = () => reject(reader.error ?? new Error("Не удалось прочитать файл"));
       reader.readAsDataURL(file);
     });
+  }
+
+  async logout(): Promise<void> {
+    // Real backend: POST /api/auth/logout clears the session cookie only.
+    // Nothing to invalidate locally in the mock — profile data is untouched.
+    await delay(300);
   }
 
   async resetDemoProfile(): Promise<void> {

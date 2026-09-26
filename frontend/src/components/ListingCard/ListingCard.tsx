@@ -1,7 +1,6 @@
 import { Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhotoPlaceholder from "../PhotoPlaceholder/PhotoPlaceholder";
-import VerifiedBadge from "../Badge/Badge";
 import RatingStars from "../RatingStars/RatingStars";
 import Tag from "../Tag/Tag";
 import type { Listing } from "../../types/listing";
@@ -26,11 +25,6 @@ export default function ListingCard({ listing }: ListingCardProps) {
     >
       <div className={styles.photoWrap}>
         <PhotoPlaceholder variant={listing.photos[0]} className={styles.photo} />
-        {listing.verified && (
-          <div className={styles.badgeOverlay}>
-            <VerifiedBadge size="sm" />
-          </div>
-        )}
       </div>
       <div className={styles.body}>
         <div className={styles.topRow}>

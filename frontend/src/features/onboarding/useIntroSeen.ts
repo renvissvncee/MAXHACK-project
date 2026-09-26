@@ -17,3 +17,8 @@ export function useIntroSeen() {
 
   return { introSeen, markIntroSeen };
 }
+
+/** Demo-only: lets "reset profile" also restart the intro carousel. */
+export function clearIntroSeen() {
+  localStorage.removeItem(STORAGE_KEY);
+}

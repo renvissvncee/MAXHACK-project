@@ -13,7 +13,6 @@ export interface UserProfile {
   interests: string[];
   /** Photo URL (or data URL in the mock), null when no photo is set. */
   photo: string | null;
-  verified: boolean;
   /** True once the user has completed the profile-setup step at least once. */
   onboardingCompleted: boolean;
 }

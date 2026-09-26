@@ -1,4 +1,4 @@
-import { Compass, MapPinned, ShieldCheck, Users } from "lucide-react";
+import { Compass, Handshake, MapPinned, Users } from "lucide-react";
 import { useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import Button from "../../components/Button/Button";
@@ -33,9 +33,9 @@ const slides: Slide[] = [
   {
     id: "trust",
     accent: "c",
-    icon: <ShieldCheck size={56} strokeWidth={1.4} />,
-    title: "Только для верифицированных пользователей",
-    description: "Мы хотим, чтобы первый контакт был максимально понятным и безопасным.",
+    icon: <Handshake size={56} strokeWidth={1.4} />,
+    title: "Открытые профили через MAX",
+    description: "Вы всегда видите, к кому едете в гости — никаких анонимных анкет.",
   },
   {
     id: "go",

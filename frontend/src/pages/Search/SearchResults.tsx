@@ -16,7 +16,6 @@ function readFiltersFromParams(params: URLSearchParams): SearchFormState {
   return {
     city: params.get("city") ?? "",
     guests: Number(params.get("guests") ?? 1) || 1,
-    verifiedOnly: params.get("verifiedOnly") === "1",
     accommodationType: (params.get("type") as AccommodationType | null) ?? "any",
   };
 }
@@ -40,7 +39,6 @@ export default function SearchResults() {
       const results = await searchListings({
         city: current.city || undefined,
         guests: current.guests > 1 ? current.guests : undefined,
-        verifiedOnly: current.verifiedOnly || undefined,
         accommodationType: current.accommodationType === "any" ? undefined : current.accommodationType,
       });
       setListings(results);
@@ -60,7 +58,6 @@ export default function SearchResults() {
     const params = new URLSearchParams();
     if (next.city) params.set("city", next.city);
     if (next.guests > 1) params.set("guests", String(next.guests));
-    if (next.verifiedOnly) params.set("verifiedOnly", "1");
     if (next.accommodationType !== "any") params.set("type", next.accommodationType);
     setSearchParams(params);
   };

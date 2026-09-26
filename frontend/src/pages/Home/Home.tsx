@@ -1,4 +1,4 @@
-import { SlidersHorizontal, Search as SearchIcon, ShieldCheck } from "lucide-react";
+import { SlidersHorizontal, Search as SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
@@ -40,7 +40,6 @@ export default function Home() {
     const params = new URLSearchParams();
     params.set("city", city);
     if (filters.guests > 1) params.set("guests", String(filters.guests));
-    if (filters.verifiedOnly) params.set("verifiedOnly", "1");
     if (filters.accommodationType !== "any") params.set("type", filters.accommodationType);
     navigate(`/search?${params.toString()}`);
   };
@@ -51,8 +50,7 @@ export default function Home() {
     if (city) goSearch(city);
   };
 
-  const activeFilterCount =
-    (filters.guests > 1 ? 1 : 0) + (filters.verifiedOnly ? 1 : 0) + (filters.accommodationType !== "any" ? 1 : 0);
+  const activeFilterCount = (filters.guests > 1 ? 1 : 0) + (filters.accommodationType !== "any" ? 1 : 0);
 
   if (!user) return null;
 
@@ -97,11 +95,6 @@ export default function Home() {
           {activeFilterCount > 0 && <span className={styles.filterCount}>{activeFilterCount}</span>}
         </button>
       </section>
-
-      <div className={styles.trustBanner}>
-        <ShieldCheck size={16} />
-        <span>Все варианты проверены и доступны только верифицированным пользователям</span>
-      </div>
 
       <section className={styles.listSection}>
         <h2 className={styles.sectionTitle}>Варианты рядом</h2>

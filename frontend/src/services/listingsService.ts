@@ -12,7 +12,6 @@ import { delay } from "./delay";
 export interface SearchFilters {
   city?: string;
   guests?: number;
-  verifiedOnly?: boolean;
   accommodationType?: AccommodationType;
 }
 
@@ -34,9 +33,6 @@ export async function searchListings(filters: SearchFilters): Promise<Listing[]>
       return false;
     }
     if (filters.guests && listing.guests < filters.guests) {
-      return false;
-    }
-    if (filters.verifiedOnly && !listing.verified) {
       return false;
     }
     if (filters.accommodationType && listing.accommodationType !== filters.accommodationType) {

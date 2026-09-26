@@ -1,3 +1,10 @@
+/*
+ * No `background` here on purpose: this element always gets either a
+ * `.gradient-*` class (from styles/gradients.css, for initials/emoji) or an
+ * <img> (for a real photo) to paint it. Setting a background here too would
+ * fight the gradient class for the same CSS property at equal specificity,
+ * with whichever stylesheet happens to be injected later silently winning.
+ */
 .avatar {
   border-radius: var(--radius-full);
   display: flex;
@@ -6,4 +13,13 @@
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
   line-height: 1;
+  overflow: hidden;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

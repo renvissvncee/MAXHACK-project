@@ -22,3 +22,14 @@
 .gradient-midnight {
   background: linear-gradient(135deg, #818cf8 0%, #1e1b4b 100%);
 }
+
+/* Identity avatars (current user's own initials fallback) — drawn from the MAX palette. */
+.gradient-identity-1 {
+  background: linear-gradient(135deg, #554dde 0%, #37a4f3 100%);
+}
+.gradient-identity-2 {
+  background: linear-gradient(135deg, #62047b 0%, #be91d9 100%);
+}
+.gradient-identity-3 {
+  background: linear-gradient(135deg, #391da8 0%, #134f90 100%);
+}

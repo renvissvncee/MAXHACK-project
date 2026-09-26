@@ -1,15 +1,15 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import RequireProfile from "./components/RequireProfile/RequireProfile";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import { UserProvider } from "./context/UserContext";
+import IntroCarousel from "./features/onboarding/IntroCarousel";
+import OnboardingGate from "./features/onboarding/OnboardingGate";
+import ProfileSetup from "./features/onboarding/ProfileSetup";
+import ProfilePage from "./features/profile/ProfilePage";
 import AppLayout from "./layouts/AppLayout";
 import ListingDetail from "./pages/ListingDetail/ListingDetail";
 import Home from "./pages/Home/Home";
-import Onboarding from "./pages/Onboarding/Onboarding";
-import Profile from "./pages/Profile/Profile";
 import SearchResults from "./pages/Search/SearchResults";
-import Welcome from "./pages/Welcome/Welcome";
 
 export default function App() {
   return (
@@ -18,15 +18,15 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Welcome />} />
-              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/" element={<IntroCarousel />} />
+              <Route path="/profile-setup" element={<ProfileSetup />} />
 
-              <Route element={<RequireProfile />}>
+              <Route element={<OnboardingGate />}>
                 <Route path="/listing/:id" element={<ListingDetail />} />
                 <Route element={<AppLayout />}>
                   <Route path="/home" element={<Home />} />
                   <Route path="/search" element={<SearchResults />} />
-                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile" element={<ProfilePage />} />
                 </Route>
               </Route>
 

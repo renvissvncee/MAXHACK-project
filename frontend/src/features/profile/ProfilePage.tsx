@@ -1,69 +1,67 @@
-import { Home, LogOut, Moon, PenSquare, Sun } from "lucide-react";
+import { Home, Moon, PenSquare, RotateCcw, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
 import BottomSheet from "../../components/BottomSheet/BottomSheet";
 import Button from "../../components/Button/Button";
-import ProfileForm from "../../components/ProfileForm/ProfileForm";
 import StateView from "../../components/StateView/StateView";
-import Tag from "../../components/Tag/Tag";
 import VerifiedBadge from "../../components/Badge/Badge";
 import { useTheme } from "../../context/ThemeContext";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../context/UserContext";
-import type { UserDraft } from "../../types/user";
-import styles from "./Profile.module.css";
+import { getInterestLabel } from "../../data/interests";
+import type { UserProfileDraft } from "../../types/user";
+import ProfileFields from "./components/ProfileFields";
+import styles from "./ProfilePage.module.css";
 
-export default function Profile() {
+export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, updateProfile, logout } = useUser();
+  const { user, updateProfile, resetDemoProfile, isSaving } = useUser();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
 
   const [editOpen, setEditOpen] = useState(false);
-  const [draft, setDraft] = useState<UserDraft | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState<UserProfileDraft | null>(null);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   if (!user) return null;
 
   const openEdit = () => {
-    setDraft({
-      name: user.name,
-      city: user.city,
-      bio: user.bio,
-      interests: user.interests,
-      avatarEmoji: user.avatarEmoji,
-      avatarColor: user.avatarColor,
-    });
+    setDraft({ name: user.name, city: user.city, bio: user.bio, interests: user.interests, photo: user.photo });
     setEditOpen(true);
   };
 
   const saveEdit = async () => {
     if (!draft) return;
-    setSaving(true);
     await updateProfile(draft);
-    setSaving(false);
     setEditOpen(false);
     showToast("Профиль обновлён");
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/", { replace: true });
+  const handleReset = async () => {
+    setConfirmResetOpen(false);
+    await resetDemoProfile();
+    navigate("/profile-setup", { replace: true });
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.headerCard}>
-        <Avatar emoji={user.avatarEmoji} color={user.avatarColor} size={72} />
+        <Avatar photo={user.photo} name={user.name} size={72} />
         <h1 className={styles.name}>{user.name}</h1>
         <p className={styles.city}>{user.city}</p>
-        {user.verified && <VerifiedBadge />}
+        {user.verified ? (
+          <VerifiedBadge />
+        ) : (
+          <span className={styles.unverified}>Верификация не завершена</span>
+        )}
         {user.bio && <p className={styles.bio}>{user.bio}</p>}
         {user.interests.length > 0 && (
           <div className={styles.interests}>
-            {user.interests.map((interest) => (
-              <Tag key={interest}>{interest}</Tag>
+            {user.interests.map((id) => (
+              <span key={id} className={styles.interestChip}>
+                {getInterestLabel(id)}
+              </span>
             ))}
           </div>
         )}
@@ -91,13 +89,20 @@ export default function Profile() {
             </span>
             <span className={styles.switch} data-on={theme === "dark" || undefined} />
           </button>
-          <button type="button" className={`${styles.settingRow} ${styles.danger}`} onClick={handleLogout}>
+          <button
+            type="button"
+            className={`${styles.settingRow} ${styles.muted}`}
+            onClick={() => setConfirmResetOpen(true)}
+          >
             <span className={styles.settingLabel}>
-              <LogOut size={18} />
-              Выйти
+              <RotateCcw size={18} />
+              Сбросить демо-профиль
             </span>
           </button>
         </div>
+        <p className={styles.settingsHint}>
+          Это демо-действие для тестирования онбординга — в реальном MAX-аккаунте его не будет.
+        </p>
       </section>
 
       <BottomSheet
@@ -105,12 +110,33 @@ export default function Profile() {
         onClose={() => setEditOpen(false)}
         title="Редактировать профиль"
         footer={
-          <Button size="lg" fullWidth onClick={saveEdit} loading={saving}>
+          <Button size="lg" fullWidth onClick={saveEdit} loading={isSaving}>
             Сохранить
           </Button>
         }
       >
-        {draft && <ProfileForm value={draft} onChange={setDraft} />}
+        {draft && <ProfileFields value={draft} onChange={setDraft} />}
+      </BottomSheet>
+
+      <BottomSheet
+        open={confirmResetOpen}
+        onClose={() => setConfirmResetOpen(false)}
+        title="Сбросить демо-профиль?"
+        footer={
+          <div className={styles.confirmActions}>
+            <Button variant="outline" fullWidth onClick={() => setConfirmResetOpen(false)}>
+              Отмена
+            </Button>
+            <Button variant="primary" fullWidth onClick={handleReset}>
+              Сбросить
+            </Button>
+          </div>
+        }
+      >
+        <p className={styles.confirmText}>
+          Локальные данные профиля будут удалены, и вы снова пройдёте экран «Расскажите о себе». Это полезно для
+          повторного тестирования сценария, реального аккаунта MAX это не затронет.
+        </p>
       </BottomSheet>
     </div>
   );

@@ -16,25 +16,6 @@
   color: var(--color-text-secondary);
 }
 
-.avatarGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.avatarOption {
-  padding: 3px;
-  border-radius: var(--radius-full);
-  border: 2px solid transparent;
-  background: none;
-  cursor: pointer;
-  line-height: 0;
-}
-
-.avatarOption[data-active="true"] {
-  border-color: var(--color-primary);
-}
-
 .input,
 .textarea {
   width: 100%;
@@ -56,10 +37,4 @@
 .textarea {
   resize: none;
   line-height: 1.45;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }

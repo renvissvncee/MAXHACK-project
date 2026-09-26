@@ -1,0 +1,136 @@
+.screen {
+  padding: max(20px, env(safe-area-inset-top, 0px)) 0 max(20px, env(safe-area-inset-bottom, 0px));
+  outline: none;
+}
+
+.viewport {
+  flex: 1;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.slide {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.illustration {
+  position: relative;
+  flex: 1;
+  min-height: 260px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-lg);
+}
+
+.illustration[data-accent="a"] {
+  background: linear-gradient(150deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+.illustration[data-accent="b"] {
+  background: linear-gradient(150deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+}
+.illustration[data-accent="c"] {
+  background: linear-gradient(150deg, var(--color-accent) 0%, var(--color-primary) 100%);
+}
+.illustration[data-accent="d"] {
+  background: linear-gradient(150deg, var(--color-primary) 0%, var(--color-accent) 60%, var(--color-secondary) 100%);
+}
+
+.blobOne,
+.blobTwo {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  filter: blur(2px);
+}
+
+.blobOne {
+  width: 160px;
+  height: 160px;
+  top: -40px;
+  right: -30px;
+}
+
+.blobTwo {
+  width: 120px;
+  height: 120px;
+  bottom: -30px;
+  left: -20px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.illustrationIcon {
+  position: relative;
+  color: #ffffff;
+  opacity: 0.95;
+}
+
+.textBlock {
+  padding-bottom: 8px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.description {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  max-width: 340px;
+}
+
+.footer {
+  padding: 20px 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-border-strong);
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.dot[data-active="true"] {
+  width: 22px;
+  background: var(--color-primary);
+}
+
+.disclaimer {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}

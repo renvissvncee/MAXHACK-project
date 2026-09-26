@@ -175,7 +175,12 @@ export default function ListingDetail() {
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>О хозяине</h2>
             <div className={styles.hostCard}>
-              <Avatar emoji={listing.host.avatarEmoji} color={listing.host.avatarColor} size={52} />
+              <Avatar
+                emoji={listing.host.avatarEmoji}
+                color={listing.host.avatarColor}
+                name={listing.host.name}
+                size={52}
+              />
               <div className={styles.hostInfo}>
                 <div className={styles.hostNameRow}>
                   <strong>{listing.host.name}</strong>

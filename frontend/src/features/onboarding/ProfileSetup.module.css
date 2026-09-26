@@ -66,15 +66,7 @@
   animation: scaleIn 0.25s ease;
 }
 
-.verifyIcon {
-  width: 84px;
-  height: 84px;
-  border-radius: var(--radius-full);
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.verifyAvatar {
   margin-bottom: 18px;
 }
 
@@ -108,6 +100,8 @@
 .summaryCard div {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .summaryCard strong {

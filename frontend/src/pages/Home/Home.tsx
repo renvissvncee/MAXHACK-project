@@ -60,7 +60,7 @@ export default function Home() {
     <div className={styles.page}>
       <header className={styles.header}>
         <button type="button" className={styles.profileLink} onClick={() => navigate("/profile")}>
-          <Avatar emoji={user.avatarEmoji} color={user.avatarColor} size={42} />
+          <Avatar photo={user.photo} name={user.name} size={42} />
           <div>
             <p className={styles.greeting}>Привет, {user.name.split(" ")[0] || "путешественник"} 👋</p>
             <p className={styles.location}>Ваш город: {user.city}</p>

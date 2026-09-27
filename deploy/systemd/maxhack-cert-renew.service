@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew MAXHACK short-lived IP certificate
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker run --rm --network host -v /opt/maxhack/letsencrypt:/etc/letsencrypt -v /opt/maxhack/letsencrypt-lib:/var/lib/letsencrypt -v /opt/maxhack/letsencrypt-log:/var/log/letsencrypt certbot/certbot:latest renew --quiet
+ExecStartPost=/usr/bin/docker kill --signal HUP maxhack-edge

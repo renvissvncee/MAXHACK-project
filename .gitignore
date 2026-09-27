@@ -24,3 +24,6 @@ __pycache__/
 
 # Local polling cursor
 .state/
+
+# Local trusted CA bundle for Docker (exported from the host)
+.certs/

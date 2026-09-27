@@ -18,6 +18,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { user } = useUser();
   const [listings, setListings] = useState<Listing[]>([]);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<SearchFormState>(defaultSearchState);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function Home() {
         setListings(data);
         setIsLoading(false);
       }
-    });
+    }).catch((error) => { if (!cancelled) { setError(error.message); setIsLoading(false); } });
     return () => {
       cancelled = true;
     };
@@ -39,6 +40,8 @@ export default function Home() {
   const goSearch = (city: string) => {
     const params = new URLSearchParams();
     params.set("city", city);
+    if (filters.dateFrom) params.set("date_from", filters.dateFrom);
+    if (filters.dateTo) params.set("date_to", filters.dateTo);
     if (filters.guests > 1) params.set("guests", String(filters.guests));
     if (filters.accommodationType !== "any") params.set("type", filters.accommodationType);
     navigate(`/search?${params.toString()}`);
@@ -98,6 +101,8 @@ export default function Home() {
 
       <section className={styles.listSection}>
         <h2 className={styles.sectionTitle}>Варианты рядом</h2>
+        {error && <p role="alert">{error}</p>}
+        {!isLoading && !error && !listings.length && <p>Пока нет предложений других пользователей.</p>}
         <div className={styles.cardsGrid}>
           {isLoading
             ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)

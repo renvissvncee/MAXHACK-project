@@ -51,7 +51,7 @@ export default function ListingDetail() {
       } else {
         setStatus("error");
       }
-    });
+    }).catch(() => { if (!cancelled) setStatus("error"); });
     return () => {
       cancelled = true;
     };
@@ -63,10 +63,8 @@ export default function ListingDetail() {
   };
 
   const handleRequest = async () => {
-    setSending(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
     setSending(false);
-    setSent(true);
+    showToast("Заявки и взаимные знакомства ещё не подключены.");
   };
 
   const closeRequest = () => {

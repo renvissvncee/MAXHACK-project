@@ -27,6 +27,7 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
           variant="primary"
           size="lg"
           fullWidth
+          disabled={Boolean(value.dateFrom) !== Boolean(value.dateTo) || Boolean(value.dateFrom && value.dateTo < value.dateFrom)}
           onClick={() => {
             onApply();
             onClose();
@@ -74,7 +75,11 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
         </div>
       </div>
 
-      <p className={styles.hint}>Даты и дополнительные фильтры — демо-заглушка для MVP.</p>
+      <div className={styles.section}>
+        <label>Заезд <input type="date" value={value.dateFrom} onChange={e => onChange({ ...value, dateFrom: e.target.value })} /></label>
+        <label>Выезд <input type="date" min={value.dateFrom} value={value.dateTo} onChange={e => onChange({ ...value, dateTo: e.target.value })} /></label>
+        <p>Укажите обе даты или оставьте обе пустыми.</p>
+      </div>
     </BottomSheet>
   );
 }

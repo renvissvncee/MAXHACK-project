@@ -5,7 +5,7 @@ export interface Host {
   name: string;
   avatarColor: string;
   avatarEmoji: string;
-  rating: number;
+  rating: number | null;
   reviewsCount: number;
   bio: string;
   interests: string[];
@@ -22,7 +22,7 @@ export interface Listing {
   tags: string[];
   guests: number;
   accommodationType: AccommodationType;
-  rating: number;
+  rating: number | null;
   reviewsCount: number;
   rules: string[];
   amenities: string[];

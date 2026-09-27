@@ -1,43 +1,26 @@
-import { listings } from "../data/listings";
+import { api } from "./api";
 import type { AccommodationType, Listing } from "../types/listing";
-import { delay } from "./delay";
-
-/**
- * Data-access layer for listings. Every function is async and returns
- * plain data, so swapping the mock implementation below for real
- * `fetch(...)` calls to a backend API later won't require any change
- * in the components that call these functions.
- */
-
-export interface SearchFilters {
-  city?: string;
-  guests?: number;
-  accommodationType?: AccommodationType;
-}
-
-export async function getListings(): Promise<Listing[]> {
-  await delay(500);
-  return listings;
-}
-
-export async function getListingById(id: string): Promise<Listing | undefined> {
-  await delay(350);
-  return listings.find((listing) => listing.id === id);
-}
-
+export interface SearchFilters { city?: string; guests?: number; accommodationType?: AccommodationType; dateFrom?: string; dateTo?: string; }
+export interface ListingInput { city: string; title: string; shortDescription: string; description: string; guests: number; accommodationType: AccommodationType; availableFrom: string; availableTo: string; tags: string[]; amenities: string[]; rules: string[]; }
+type ResponseListing = Omit<Listing, "availableDates" | "host"> & ListingInput & { host: Omit<Listing["host"], "rating" | "reviewsCount"> };
+function listing(data: ResponseListing): Listing { return { ...data, host: { ...data.host, rating: null, reviewsCount: 0 }, availableDates: `${data.availableFrom} — ${data.availableTo}` }; }
 export async function searchListings(filters: SearchFilters): Promise<Listing[]> {
-  await delay(650);
-
-  return listings.filter((listing) => {
-    if (filters.city && listing.city.toLowerCase() !== filters.city.toLowerCase()) {
-      return false;
-    }
-    if (filters.guests && listing.guests < filters.guests) {
-      return false;
-    }
-    if (filters.accommodationType && listing.accommodationType !== filters.accommodationType) {
-      return false;
-    }
-    return true;
-  });
+  const params = new URLSearchParams();
+  if (filters.city) params.set("city", filters.city);
+  if (filters.guests) params.set("guests", String(filters.guests));
+  if (filters.dateFrom) params.set("date_from", filters.dateFrom);
+  if (filters.dateTo) params.set("date_to", filters.dateTo);
+  const rows: Listing[] = [];
+  // Fetch all pages before applying the UI's accommodation filter, unsupported by API.
+  for (let offset = 0; ; offset += 100) {
+    params.set("limit", "100"); params.set("offset", String(offset));
+    const page = await api<ResponseListing[]>(`/api/listings?${params}`);
+    rows.push(...page.map(listing));
+    if (page.length < 100) break;
+  }
+  return filters.accommodationType ? rows.filter(row => row.accommodationType === filters.accommodationType) : rows;
 }
+export const getListings = () => searchListings({});
+export async function getListingById(id: string) { return listing(await api<ResponseListing>(`/api/listings/${encodeURIComponent(id)}`)); }
+export async function getMyListing() { return (await api<{ listing: ResponseListing | null }>("/api/me/listing")).listing; }
+export async function saveMyListing(data: ListingInput) { return api<ResponseListing>("/api/me/listing", { method: "PUT", body: JSON.stringify(data) }); }

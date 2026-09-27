@@ -6,6 +6,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.api.notifications import router as notifications_router
+from app.api.reviews import router as reviews_router
+from app.api.requests import router as requests_router
 from app.api.auth import router as auth_router
 from app.api.profiles import router as profiles_router
 from app.api.listings import router as listings_router
@@ -37,7 +40,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(title="Приют API", version="0.1.0", lifespan=lifespan)
     app.add_middleware(CORSMiddleware, allow_origins=configuration.allowed_origins,
-                       allow_credentials=True, allow_methods=["GET", "POST", "PATCH"],
+                       allow_credentials=True, allow_methods=["GET", "POST", "PATCH", "PUT"],
                        allow_headers=["Content-Type"])
     app.add_exception_handler(AppError, app_error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -54,6 +57,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router)
     app.include_router(profiles_router)
     app.include_router(listings_router)
+    app.include_router(requests_router)
+    app.include_router(reviews_router)
+    app.include_router(notifications_router)
     return app
 
 

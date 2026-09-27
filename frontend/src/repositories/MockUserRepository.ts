@@ -11,7 +11,7 @@ const STORAGE_KEY = "priut:user";
  * instead of a from-scratch registration form.
  */
 const MAX_IDENTITY_SEED: UserProfile = {
-  maxId: "max-demo-482913",
+  id: "max-demo-482913",
   name: "Алексей Смирнов",
   city: "",
   bio: "",

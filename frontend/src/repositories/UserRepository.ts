@@ -1,13 +1,6 @@
 import type { UserProfile, UserProfileDraft } from "../types/user";
 
-/**
- * Contract the rest of the app codes against. The mini-app never creates a
- * user from scratch — MAX/the bot already knows who's opening it — so
- * `getCurrentUser` always resolves to a profile (never null), just possibly
- * one where `onboardingCompleted` is still false and city/bio/interests are
- * empty. Swap `MockUserRepository` for a real `ApiUserRepository` later
- * without touching a single component.
- */
+// getCurrentUser rejects when authentication or the backend is unavailable.
 export interface UserRepository {
   getCurrentUser(): Promise<UserProfile>;
   updateProfile(patch: Partial<UserProfileDraft>): Promise<UserProfile>;

@@ -1,11 +1,6 @@
-/**
- * Domain model for the current user. Field names mirror what the MAX bot /
- * backend is expected to hand the mini-app (see project brief §9):
- * maxId, name, city, bio, interests, photo. Do not invent a separate
- * "frontend user" shape — this is the one type used end to end.
- */
+// UI model; ApiUserRepository maps the backend contract into this shape.
 export interface UserProfile {
-  maxId: string;
+  id: string;
   name: string;
   city: string;
   bio: string;

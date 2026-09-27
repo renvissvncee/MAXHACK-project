@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import StateView from "../components/StateView/StateView";
+import SplashLoader from "../components/SplashLoader/SplashLoader";
 import { userService } from "../services/userService";
 import type { UserProfile, UserProfileDraft } from "../types/user";
 
@@ -21,6 +23,7 @@ const UserContext = createContext<UserContextValue | null>(null);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [status, setStatus] = useState<UserStatus>("loading");
+  const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -29,7 +32,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const current = await userService.getCurrentUser();
       setUser(current);
       setStatus("ready");
-    } catch {
+    } catch (error) {
+      setUser(null);
+      setError(error instanceof Error ? error.message : "Не удалось войти");
       setStatus("error");
     }
   }, []);
@@ -62,7 +67,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const uploadProfilePhoto = useCallback((file: File) => userService.uploadProfilePhoto(file), []);
 
-  const logout = useCallback(() => userService.logout(), []);
+  const logout = useCallback(async () => {
+    await userService.logout(); setUser(null); setError("Вы вышли. Нажмите «Повторить», чтобы войти через MAX."); setStatus("error");
+  }, []);
 
   const resetDemoProfile = useCallback(async () => {
     await userService.resetDemoProfile();
@@ -94,6 +101,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  if (status === "loading") return <SplashLoader />;
+  if (status === "error") return <StateView icon={<span>MAX</span>} title="Вход в Приют" description={error} actionLabel="Повторить" onAction={load} />;
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 

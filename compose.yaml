@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:17
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-priut}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
@@ -14,6 +15,7 @@ services:
       retries: 10
   backend:
     build: ./backend
+    restart: unless-stopped
     env_file:
       - path: ./.env
         required: false

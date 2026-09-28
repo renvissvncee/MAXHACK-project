@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Heart,
   ListChecks,
+  MessageSquareText,
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -227,6 +228,10 @@ export default function ListingDetail() {
                     <Tag key={interest}>{interest}</Tag>
                   ))}
                 </div>
+                <button type="button" className={styles.reviewsLink}
+                  onClick={() => navigate(`/users/${listing.host.id}/reviews`)}>
+                  <MessageSquareText size={15} /> Посмотреть отзывы
+                </button>
               </div>
             </div>
           </div>

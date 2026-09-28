@@ -1,11 +1,13 @@
-import { Check, Inbox, RefreshCw, UserRoundCheck, X } from "lucide-react";
+import { Check, Inbox, MessageSquareText, RefreshCw, UserRoundCheck, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
 import Button from "../../components/Button/Button";
 import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
+import ReviewSheet from "../../features/reviews/ReviewSheet";
 import { decideStayRequest, getMatchContact, getStayRequests } from "../../services/requestsService";
-import type { MatchContact, RequestDirection, RequestStatus, StayRequest } from "../../types/request";
+import type { MatchContact, RequestDirection, RequestParty, RequestStatus, StayRequest } from "../../types/request";
 import styles from "./Requests.module.css";
 
 type LoadStatus = "loading" | "ready" | "error";
@@ -22,11 +24,13 @@ function formatDate(value: string) {
 }
 
 export default function Requests() {
-  const [direction, setDirection] = useState<RequestDirection>("incoming");
+  const [searchParams] = useSearchParams();
+  const [direction, setDirection] = useState<RequestDirection>(() => searchParams.get("direction") === "outgoing" ? "outgoing" : "incoming");
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [items, setItems] = useState<StayRequest[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Record<string, MatchContact>>({});
+  const [reviewSubject, setReviewSubject] = useState<RequestParty | null>(null);
   const { showToast } = useToast();
 
   const load = useCallback(async () => {
@@ -41,6 +45,10 @@ export default function Requests() {
   }, [direction, showToast]);
 
   useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const focus = searchParams.get("focus");
+    if (status === "ready" && focus) document.getElementById(`request-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [searchParams, status]);
 
   const decide = async (request: StayRequest, nextStatus: "accepted" | "declined") => {
     setBusyId(request.id);
@@ -105,7 +113,8 @@ export default function Requests() {
           const person = direction === "incoming" ? request.guest : request.host;
           const contact = contacts[request.id];
           return (
-            <article key={request.id} className={styles.card}>
+            <article key={request.id} id={`request-${request.id}`} className={styles.card}
+              data-focus={searchParams.get("focus") === request.id || undefined}>
               <div className={styles.person}>
                 <Avatar emoji={person.avatarEmoji} color={person.avatarColor} name={person.name} size={46} />
                 <div>
@@ -130,21 +139,30 @@ export default function Requests() {
               )}
 
               {request.status === "accepted" && !contact && (
-                <Button variant="secondary" fullWidth icon={<UserRoundCheck size={17} />}
-                  loading={busyId === request.id} onClick={() => void revealContact(request)}>
-                  Показать контакт MAX
-                </Button>
+                <div className={styles.matchActions}>
+                  <Button variant="secondary" icon={<UserRoundCheck size={17} />}
+                    loading={busyId === request.id} onClick={() => void revealContact(request)}>
+                    Контакт MAX
+                  </Button>
+                  <Button variant="outline" icon={<MessageSquareText size={17} />}
+                    onClick={() => setReviewSubject(person)}>Отзыв</Button>
+                </div>
               )}
               {contact && (
-                <div className={styles.contact}>
-                  <span>Контакт MAX</span>
-                  <strong>{contact.username ? `@${contact.username}` : `ID ${contact.maxUserId}`}</strong>
-                </div>
+                <>
+                  <div className={styles.contact}>
+                    <span>Контакт MAX</span>
+                    <strong>{contact.username ? `@${contact.username}` : `ID ${contact.maxUserId}`}</strong>
+                  </div>
+                  <Button variant="outline" fullWidth icon={<MessageSquareText size={17} />}
+                    onClick={() => setReviewSubject(person)}>Оставить или изменить отзыв</Button>
+                </>
               )}
             </article>
           );
         })}
       </div>}
+      <ReviewSheet subject={reviewSubject} onClose={() => setReviewSubject(null)} />
     </main>
   );
 }

@@ -1,7 +1,6 @@
 import { api, ApiError } from "../services/api";
 import type { UserProfile, UserProfileDraft } from "../types/user";
 import type { UserRepository } from "./UserRepository";
-declare global { interface Window { WebApp?: { initData?: string }; } }
 interface ProfileResponse { id: string; name: string; city: string; bio: string; interests: string[]; photoUrl: string | null; profileCompleted: boolean; }
 function profile(data: ProfileResponse): UserProfile {
   return { id: data.id, name: data.name, city: data.city, bio: data.bio, interests: data.interests,

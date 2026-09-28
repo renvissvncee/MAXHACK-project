@@ -81,6 +81,11 @@
   box-shadow: var(--shadow-sm);
 }
 
+.card[data-focus="true"] {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
 .person {
   display: flex;
   align-items: center;
@@ -153,6 +158,12 @@
   gap: 8px;
 }
 
+.matchActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .contact {
   border-radius: var(--radius-md);
   padding: 11px 12px;
@@ -181,6 +192,10 @@
   }
 
   .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .matchActions {
     grid-template-columns: 1fr;
   }
 }

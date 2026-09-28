@@ -54,10 +54,15 @@ export default function IntroCarousel() {
   const { introSeen, markIntroSeen } = useIntroSeen();
 
   const [index, setIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
+  // Drag state lives in refs, not React state: pointermove can fire 60-120x/s
+  // on a phone, and running a full re-render (recreating all 4 slides, their
+  // icons and blurred blobs) on every one of those events is what caused the
+  // visible jank. Only `index` — committed once per swipe, on release — needs
+  // to be real state; the live drag position is applied straight to the DOM.
   const dragStartX = useRef(0);
+  const dragOffset = useRef(0);
+  const isDragging = useRef(false);
   const containerWidth = useRef(0);
 
   const isLast = index === slides.length - 1;
@@ -66,6 +71,11 @@ export default function IntroCarousel() {
   if (introSeen) {
     return <Navigate to={user && !user.onboardingCompleted ? "/profile-setup" : "/home"} replace />;
   }
+
+  const applyTransform = (targetIndex: number, offset: number) => {
+    if (!trackRef.current) return;
+    trackRef.current.style.transform = `translateX(calc(${-targetIndex * (100 / slides.length)}% + ${offset}px))`;
+  };
 
   const goTo = (next: number) => {
     setIndex(Math.max(0, Math.min(slides.length - 1, next)));
@@ -90,30 +100,37 @@ export default function IntroCarousel() {
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     dragStartX.current = event.clientX;
+    dragOffset.current = 0;
     containerWidth.current = trackRef.current?.parentElement?.offsetWidth ?? window.innerWidth;
-    setIsDragging(true);
+    isDragging.current = true;
+    if (trackRef.current) trackRef.current.dataset.dragging = "true";
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
+    if (!isDragging.current) return;
     let offset = event.clientX - dragStartX.current;
     if ((index === 0 && offset > 0) || (isLast && offset < 0)) {
       offset *= 0.35;
     }
-    setDragOffset(offset);
+    dragOffset.current = offset;
+    applyTransform(index, offset);
   };
 
   const endDrag = () => {
-    if (!isDragging) return;
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (trackRef.current) trackRef.current.dataset.dragging = "false";
     const threshold = containerWidth.current * SWIPE_THRESHOLD_RATIO;
-    if (dragOffset < -threshold && !isLast) {
+    const offset = dragOffset.current;
+    dragOffset.current = 0;
+    if (offset < -threshold && !isLast) {
       goTo(index + 1);
-    } else if (dragOffset > threshold && index > 0) {
+    } else if (offset > threshold && index > 0) {
       goTo(index - 1);
+    } else {
+      applyTransform(index, 0);
     }
-    setIsDragging(false);
-    setDragOffset(0);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -135,10 +152,10 @@ export default function IntroCarousel() {
           <div
             ref={trackRef}
             className={styles.track}
+            data-dragging="false"
             style={{
               width: `${slides.length * 100}%`,
-              transform: `translateX(calc(${-index * (100 / slides.length)}% + ${dragOffset}px))`,
-              transition: isDragging ? "none" : "transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1)",
+              transform: `translateX(${-index * (100 / slides.length)}%)`,
             }}
           >
             {slides.map((slide) => (

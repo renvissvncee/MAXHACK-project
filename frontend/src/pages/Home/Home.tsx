@@ -1,11 +1,12 @@
-import { SlidersHorizontal, Search as SearchIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlertTriangle, Home as HomeIcon, SlidersHorizontal, Search as SearchIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
 import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import ListingCard from "../../components/ListingCard/ListingCard";
 import SkeletonCard from "../../components/SkeletonCard/SkeletonCard";
 import FilterSheet from "../../components/FilterSheet/FilterSheet";
+import StateView from "../../components/StateView/StateView";
 import Tag from "../../components/Tag/Tag";
 import { quickCities } from "../../data/cities";
 import { useUser } from "../../context/UserContext";
@@ -14,28 +15,34 @@ import { defaultSearchState, type SearchFormState } from "../../types/filters";
 import type { Listing } from "../../types/listing";
 import styles from "./Home.module.css";
 
+type ListingsStatus = "loading" | "success" | "empty" | "error";
+
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useUser();
   const [listings, setListings] = useState<Listing[]>([]);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState<ListingsStatus>("loading");
   const [filters, setFilters] = useState<SearchFormState>(defaultSearchState);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [cityInput, setCityInput] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    getListings().then((data) => {
-      if (!cancelled) {
+  const loadListings = useCallback(() => {
+    setStatus("loading");
+    getListings()
+      .then((data) => {
         setListings(data);
-        setIsLoading(false);
-      }
-    }).catch((error) => { if (!cancelled) { setError(error.message); setIsLoading(false); } });
-    return () => {
-      cancelled = true;
-    };
+        setStatus(data.length > 0 ? "success" : "empty");
+      })
+      .catch((caught) => {
+        setError(caught instanceof Error ? caught.message : "Не удалось загрузить варианты.");
+        setStatus("error");
+      });
   }, []);
+
+  useEffect(() => {
+    loadListings();
+  }, [loadListings]);
 
   const goSearch = (city: string) => {
     const params = new URLSearchParams();
@@ -101,13 +108,37 @@ export default function Home() {
 
       <section className={styles.listSection}>
         <h2 className={styles.sectionTitle}>Варианты рядом</h2>
-        {error && <p role="alert">{error}</p>}
-        {!isLoading && !error && !listings.length && <p>Пока нет предложений других пользователей.</p>}
-        <div className={styles.cardsGrid}>
-          {isLoading
-            ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)
-            : listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
-        </div>
+        {status === "loading" && (
+          <div className={styles.cardsGrid}>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
+        )}
+        {status === "error" && (
+          <StateView
+            tone="danger"
+            icon={<AlertTriangle size={26} strokeWidth={1.6} />}
+            title="Не удалось загрузить варианты"
+            description={error}
+            actionLabel="Повторить"
+            onAction={loadListings}
+          />
+        )}
+        {status === "empty" && (
+          <StateView
+            icon={<HomeIcon size={26} strokeWidth={1.6} />}
+            title="Пока нет предложений"
+            description="Другие пользователи ещё не добавили варианты размещения."
+          />
+        )}
+        {status === "success" && (
+          <div className={styles.cardsGrid}>
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
       </section>
 
       <FilterSheet

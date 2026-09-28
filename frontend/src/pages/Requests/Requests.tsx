@@ -8,7 +8,10 @@ import { useToast } from "../../context/ToastContext";
 import ReviewSheet from "../../features/reviews/ReviewSheet";
 import { decideStayRequest, getMatchContact, getStayRequests } from "../../services/requestsService";
 import type { MatchContact, RequestDirection, RequestParty, RequestStatus, StayRequest } from "../../types/request";
+import { pluralRu } from "../../utils/plural";
 import styles from "./Requests.module.css";
+
+const GUEST_FORMS = ["гость", "гостя", "гостей"] as const;
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -49,6 +52,15 @@ export default function Requests() {
     const focus = searchParams.get("focus");
     if (status === "ready" && focus) document.getElementById(`request-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [searchParams, status]);
+  useEffect(() => {
+    // A notification deep link can navigate here while this screen is already
+    // mounted (same route, only query params change) — React Router won't
+    // remount, so the initial lazy state never re-reads the URL. Re-sync only
+    // when the URL itself names a direction; manual tab clicks never touch
+    // the URL, so this never fights the user's own tab choice.
+    const requested = searchParams.get("direction");
+    if (requested === "incoming" || requested === "outgoing") setDirection(requested);
+  }, [searchParams]);
 
   const decide = async (request: StayRequest, nextStatus: "accepted" | "declined") => {
     setBusyId(request.id);
@@ -125,7 +137,7 @@ export default function Requests() {
               </div>
               <div className={styles.details}>
                 <span>{formatDate(request.dateFrom)} — {formatDate(request.dateTo)}</span>
-                <span>{request.guests} {request.guests === 1 ? "гость" : "гося"}</span>
+                <span>{request.guests} {pluralRu(request.guests, GUEST_FORMS)}</span>
               </div>
               {request.message && <p className={styles.message}>{request.message}</p>}
 

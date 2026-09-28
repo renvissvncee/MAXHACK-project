@@ -4,7 +4,10 @@ import PhotoPlaceholder from "../PhotoPlaceholder/PhotoPlaceholder";
 import RatingStars from "../RatingStars/RatingStars";
 import Tag from "../Tag/Tag";
 import type { Listing } from "../../types/listing";
+import { pluralRu } from "../../utils/plural";
 import styles from "./ListingCard.module.css";
+
+const GUEST_FORMS = ["гость", "гостя", "гостей"] as const;
 
 interface ListingCardProps {
   listing: Listing;
@@ -38,7 +41,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <div className={styles.tags}>
           <Tag>
             <Users size={12} style={{ marginRight: 4 }} />
-            {listing.guests} {listing.guests === 1 ? "гость" : "гостя"}
+            {listing.guests} {pluralRu(listing.guests, GUEST_FORMS)}
           </Tag>
           {listing.tags.slice(0, 2).map((tag) => (
             <Tag key={tag}>{tag}</Tag>

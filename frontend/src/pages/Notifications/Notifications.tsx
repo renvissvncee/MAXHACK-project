@@ -5,7 +5,10 @@ import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
 import { getNotifications, markNotificationRead, notificationDestination } from "../../services/notificationsService";
 import type { AppNotification, NotificationKind, NotificationPage } from "../../types/notification";
+import { pluralRu } from "../../utils/plural";
 import styles from "./Notifications.module.css";
+
+const UNREAD_FORMS = ["непрочитанное", "непрочитанных", "непрочитанных"] as const;
 
 const kindLabels: Record<NotificationKind, string> = {
   request_created: "Новая заявка",
@@ -54,7 +57,11 @@ export default function Notifications() {
       <div><p>События</p><h1>Уведомления</h1></div>
       <button type="button" onClick={() => void load()} aria-label="Обновить"><RefreshCw size={19} /></button>
     </header>
-    {page && page.unreadCount > 0 && <div className={styles.unread}><CheckCheck size={17} /> {page.unreadCount} непрочитанных</div>}
+    {page && page.unreadCount > 0 && (
+      <div className={styles.unread}>
+        <CheckCheck size={17} /> {page.unreadCount} {pluralRu(page.unreadCount, UNREAD_FORMS)}
+      </div>
+    )}
     {!page && !error && <p className={styles.loading}>Загружаем уведомления…</p>}
     {error && <StateView tone="danger" icon={<Bell size={28} />} title="Не удалось загрузить" description="Проверьте соединение." actionLabel="Повторить" onAction={() => void load()} />}
     {page?.items.length === 0 && <StateView icon={<Bell size={28} />} title="Пока тихо" description="Здесь появятся заявки, решения и новые отзывы." />}

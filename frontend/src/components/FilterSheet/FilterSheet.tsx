@@ -76,9 +76,27 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
       </div>
 
       <div className={styles.section}>
-        <label>Заезд <input type="date" value={value.dateFrom} onChange={e => onChange({ ...value, dateFrom: e.target.value })} /></label>
-        <label>Выезд <input type="date" min={value.dateFrom} value={value.dateTo} onChange={e => onChange({ ...value, dateTo: e.target.value })} /></label>
-        <p>Укажите обе даты или оставьте обе пустыми.</p>
+        <span className={styles.label}>Даты поездки</span>
+        <div className={styles.dates}>
+          <label>
+            <span>Заезд</span>
+            <input
+              type="date"
+              value={value.dateFrom}
+              onChange={(event) => onChange({ ...value, dateFrom: event.target.value })}
+            />
+          </label>
+          <label>
+            <span>Выезд</span>
+            <input
+              type="date"
+              min={value.dateFrom}
+              value={value.dateTo}
+              onChange={(event) => onChange({ ...value, dateTo: event.target.value })}
+            />
+          </label>
+        </div>
+        <p className={styles.datesHint}>Укажите обе даты или оставьте обе пустыми.</p>
       </div>
     </BottomSheet>
   );

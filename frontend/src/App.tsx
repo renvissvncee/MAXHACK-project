@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import { UserProvider } from "./context/UserContext";
@@ -11,10 +11,16 @@ import AppLayout from "./layouts/AppLayout";
 import ListingDetail from "./pages/ListingDetail/ListingDetail";
 import Home from "./pages/Home/Home";
 import Requests from "./pages/Requests/Requests";
-import SearchResults from "./pages/Search/SearchResults";
 import Notifications from "./pages/Notifications/Notifications";
 import NotificationLaunch from "./pages/Notifications/NotificationLaunch";
 import Reviews from "./pages/Reviews/Reviews";
+
+// Search merged into Home (same screen, ?city=... controls the results
+// section) — keep old /search links working rather than 404ing them.
+function RedirectSearchToHome() {
+  const location = useLocation();
+  return <Navigate to={{ pathname: "/home", search: location.search }} replace />;
+}
 
 export default function App() {
   return (
@@ -33,7 +39,7 @@ export default function App() {
                 <Route path="/users/:userId/reviews" element={<Reviews />} />
                 <Route element={<AppLayout />}>
                   <Route path="/home" element={<Home />} />
-                  <Route path="/search" element={<SearchResults />} />
+                  <Route path="/search" element={<RedirectSearchToHome />} />
                   <Route path="/requests" element={<Requests />} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/profile" element={<ProfilePage />} />

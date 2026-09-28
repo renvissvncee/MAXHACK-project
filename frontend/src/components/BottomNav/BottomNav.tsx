@@ -1,12 +1,13 @@
-import { Bell, Home, Inbox, Search, User } from "lucide-react";
+import { Bell, Home, Inbox, User } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { getNotifications } from "../../services/notificationsService";
 import styles from "./BottomNav.module.css";
 
+// Search lives on the Главная screen itself (city bar + inline results),
+// so it isn't a separate nav destination.
 const items = [
   { to: "/home", label: "Главная", icon: Home },
-  { to: "/search", label: "Поиск", icon: Search },
   { to: "/requests", label: "Заявки", icon: Inbox },
   { to: "/notifications", label: "События", icon: Bell },
   { to: "/profile", label: "Профиль", icon: User },

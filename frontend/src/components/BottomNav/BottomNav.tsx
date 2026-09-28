@@ -1,10 +1,11 @@
-import { Home, Search, User } from "lucide-react";
+import { Home, Inbox, Search, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import styles from "./BottomNav.module.css";
 
 const items = [
   { to: "/home", label: "Главная", icon: Home },
   { to: "/search", label: "Поиск", icon: Search },
+  { to: "/requests", label: "Заявки", icon: Inbox },
   { to: "/profile", label: "Профиль", icon: User },
 ];
 

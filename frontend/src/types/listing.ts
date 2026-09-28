@@ -26,6 +26,8 @@ export interface Listing {
   reviewsCount: number;
   rules: string[];
   amenities: string[];
+  availableFrom: string;
+  availableTo: string;
   availableDates: string;
 }
 

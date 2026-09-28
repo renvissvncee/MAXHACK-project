@@ -29,6 +29,8 @@ export const listings: Listing[] = [
     reviewsCount: 32,
     rules: ["Можно с детьми", "Нельзя с животными", "Курение запрещено"],
     amenities: ["Wi-Fi", "Своё полотенце и бельё", "Стиральная машина", "Кухня в общем доступе"],
+    availableFrom: "2026-10-03",
+    availableTo: "2026-10-28",
     availableDates: "с 3 по 28 октября",
   },
   {
@@ -56,6 +58,8 @@ export const listings: Listing[] = [
     reviewsCount: 18,
     rules: ["Только для взрослых", "Можно с животными", "Курение на балконе"],
     amenities: ["Wi-Fi", "Плед и подушка", "Общая кухня"],
+    availableFrom: "2026-10-10",
+    availableTo: "2026-11-05",
     availableDates: "с 10 октября по 5 ноября",
   },
   {
@@ -83,6 +87,8 @@ export const listings: Listing[] = [
     reviewsCount: 47,
     rules: ["Можно с детьми", "Нельзя с животными", "Курение запрещено"],
     amenities: ["Wi-Fi", "Стиральная машина", "Полностью оборудованная кухня", "Рабочее место"],
+    availableFrom: "2026-11-01",
+    availableTo: "2026-11-20",
     availableDates: "с 1 по 20 ноября",
   },
   {
@@ -113,6 +119,8 @@ export const listings: Listing[] = [
     reviewsCount: 9,
     rules: ["Есть кошки", "Курение на лестнице", "Тихие часы после 23:00"],
     amenities: ["Wi-Fi", "Плед и подушка"],
+    availableFrom: "2026-10-15",
+    availableTo: "2026-10-30",
     availableDates: "с 15 октября по 30 октября",
   },
   {
@@ -140,6 +148,8 @@ export const listings: Listing[] = [
     reviewsCount: 21,
     rules: ["Можно с детьми", "Нельзя с животными", "Курение запрещено"],
     amenities: ["Wi-Fi", "Завтрак по договорённости", "Дворик"],
+    availableFrom: "2026-10-05",
+    availableTo: "2026-10-25",
     availableDates: "с 5 по 25 октября",
   },
   {
@@ -167,6 +177,8 @@ export const listings: Listing[] = [
     reviewsCount: 14,
     rules: ["Можно с животными", "Можно с детьми", "Курение на веранде"],
     amenities: ["Wi-Fi", "Баня", "Кухня", "Парковка"],
+    availableFrom: "2026-10-01",
+    availableTo: "2026-11-15",
     availableDates: "с 1 октября по 15 ноября",
   },
   {
@@ -194,6 +206,8 @@ export const listings: Listing[] = [
     reviewsCount: 26,
     rules: ["Нельзя с животными", "Курение запрещено", "Можно с детьми"],
     amenities: ["Wi-Fi", "Стиральная машина", "Кухня", "Рабочее место"],
+    availableFrom: "2026-10-08",
+    availableTo: "2026-10-30",
     availableDates: "с 8 по 30 октября",
   },
   {
@@ -225,6 +239,8 @@ export const listings: Listing[] = [
     reviewsCount: 6,
     rules: ["Только для взрослых", "Курение на балконе", "Нельзя с животными"],
     amenities: ["Wi-Fi", "Общая кухня"],
+    availableFrom: "2026-10-12",
+    availableTo: "2026-11-10",
     availableDates: "с 12 октября по 10 ноября",
   },
   {
@@ -252,6 +268,8 @@ export const listings: Listing[] = [
     reviewsCount: 39,
     rules: ["Нельзя с животными", "Курение запрещено", "Тихие часы после 22:00"],
     amenities: ["Wi-Fi", "Йога-коврик по запросу", "Кухня", "Балкон"],
+    availableFrom: "2026-10-01",
+    availableTo: "2026-10-24",
     availableDates: "с 1 по 24 октября",
   },
 ];

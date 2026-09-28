@@ -9,6 +9,7 @@ import ProfilePage from "./features/profile/ProfilePage";
 import AppLayout from "./layouts/AppLayout";
 import ListingDetail from "./pages/ListingDetail/ListingDetail";
 import Home from "./pages/Home/Home";
+import Requests from "./pages/Requests/Requests";
 import SearchResults from "./pages/Search/SearchResults";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/home" element={<Home />} />
                   <Route path="/search" element={<SearchResults />} />
+                  <Route path="/requests" element={<Requests />} />
                   <Route path="/profile" element={<ProfilePage />} />
                 </Route>
               </Route>

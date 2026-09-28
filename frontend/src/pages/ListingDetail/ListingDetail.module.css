@@ -204,6 +204,52 @@
   line-height: 1.55;
 }
 
+.requestForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.requestDates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.requestDates label,
+.requestField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.requestDates input,
+.requestField input,
+.requestField textarea {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 11px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.requestField textarea {
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.requestDates input:focus,
+.requestField input:focus,
+.requestField textarea:focus {
+  border-color: var(--color-primary);
+}
+
 .sentState {
   display: flex;
   flex-direction: column;

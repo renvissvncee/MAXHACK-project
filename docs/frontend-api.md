@@ -8,7 +8,7 @@ Frontend загружает MAX Bridge, получает `window.WebApp.initData
 
 Рекомендуется один origin для frontend и `/api`: локально Vite proxy `/api` → `http://127.0.0.1:8000`, на сервере reverse proxy. ALLOWED_ORIGINS backend должен содержать точный origin frontend (например, `http://localhost:5173` или `https://app.example.org`, без завершающего слеша). Браузер сам устанавливает Origin для изменяющего запроса. Нельзя подставлять Origin вручную из JS.
 
-При прямом обращении к другому порту используйте `credentials: "include"`. Для same-origin тоже можно всегда указывать include. Не смешивайте localhost и 127.0.0.1: это разные хосты. Произвольное размещение frontend и API на разных сайтах не поддерживается текущей SameSite=Lax cookie; для MAX web и мобильного клиента используйте один HTTPS origin и проверьте cookies на реальных клиентах.
+При прямом обращении к другому порту используйте `credentials: "include"`. Для same-origin тоже можно всегда указывать include. Не смешивайте localhost и 127.0.0.1: это разные хосты. Произвольное размещение frontend и API на разных origin не поддерживается. Для MAX Web production-cookie использует `SameSite=None; Secure`; frontend и API должны оставаться на одном HTTPS origin.
 
 ```ts
 const response = await fetch('/api/auth/max', {
@@ -21,7 +21,7 @@ const body = await response.json();
 if (!response.ok) throw new Error(body.error.message);
 ```
 
-Backend выставляет HttpOnly cookie `priut_session`, path `/api`, SameSite=Lax. JS не читает токен. Сессия по умолчанию действует 24 часа; данные запуска MAX принимаются в течение часа, допускается опережение часов на 60 секунд. На HTTPS обязательно COOKIE_SECURE=true; false допустимо только для локального HTTP. Это идентификация аккаунта MAX, не государственная верификация личности.
+Backend выставляет HttpOnly cookie `priut_session`, path `/api`. На HTTPS используются `SameSite=None; Secure` для iframe MAX Web; в локальном HTTP — `SameSite=Lax` и `COOKIE_SECURE=false`. JS не читает токен. Сессия по умолчанию действует 24 часа; данные запуска MAX принимаются в течение часа. Это идентификация аккаунта MAX, не государственная верификация личности.
 
 ## Общий ответ профиля
 
@@ -151,7 +151,7 @@ Request содержит все поля создания, id, status (pending/a
 
 Контакт: `{"userId":"UUID собеседника","maxUserId":"123456789","username":null}`. MAX ID передаётся строкой во избежание потери точности в JavaScript. Username может отсутствовать. До принятия/после отклонения → 403 match_required; постороннему → 404. ID-ссылка намеренно не генерируется: её формат и открытие на реальных клиентах ещё не подтверждены. Эти данные нельзя включать в общедоступные карточки или логи.
 
-Отдельной таблицы matches нет: принятый запрос уже хранит обе стороны и время матча. Отзывы и уведомления будут следующим этапом. Backend не отправляет автоматические сообщения MAX на этом этапе. Frontend запросов ещё не подключён.
+Отдельной таблицы matches нет: принятый запрос уже хранит обе стороны и время матча. Frontend подключён к отправке, спискам, решениям и выдаче контакта. Отзывы и уведомления в backend реализованы, их frontend-экраны — следующий этап.
 
 ## Этап 6а — отзывы об общении
 

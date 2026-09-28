@@ -12,11 +12,17 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.config import Settings
+from app.api.auth import session_cookie_samesite
 from app.main import create_app
 from app.models import Session, User
 from app.services.auth import hash_token
 from tests.auth_helpers import TEST_TOKEN, signed_data as make_signed_data
 from uuid import uuid4
+
+
+def test_session_cookie_policy_supports_max_web_iframe():
+    assert session_cookie_samesite(secure=True) == "none"
+    assert session_cookie_samesite(secure=False) == "lax"
 
 
 @pytest.fixture
@@ -58,6 +64,7 @@ def test_login_profile_isolation_logout_and_expiration(database):
         first_id = response.json()['id']
         assert not response.json()['profileCompleted']
         assert 'HttpOnly' in response.headers['set-cookie']
+        assert 'SameSite=lax' in response.headers['set-cookie']
         assert response.headers['cache-control'] == 'no-store'
         assert 'maxUserId' not in response.json() and 'verified' not in response.json()
         first_cookie = client.cookies.get('priut_session')

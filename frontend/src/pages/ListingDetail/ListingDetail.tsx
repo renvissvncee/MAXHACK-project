@@ -20,6 +20,7 @@ import Tag from "../../components/Tag/Tag";
 import { useToast } from "../../context/ToastContext";
 import { isFavorite, toggleFavorite } from "../../services/favoritesService";
 import { getListingById } from "../../services/listingsService";
+import { createStayRequest } from "../../services/requestsService";
 import { accommodationTypeLabels, type Listing } from "../../types/listing";
 import styles from "./ListingDetail.module.css";
 
@@ -37,6 +38,11 @@ export default function ListingDetail() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [guests, setGuests] = useState(1);
+  const [message, setMessage] = useState("");
+  const [clientRequestId, setClientRequestId] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -63,14 +69,48 @@ export default function ListingDetail() {
   };
 
   const handleRequest = async () => {
-    setSending(false);
-    showToast("Заявки и взаимные знакомства ещё не подключены.");
+    if (!listing || !dateFrom || !dateTo || dateTo < dateFrom
+      || dateFrom < listing.availableFrom || dateTo > listing.availableTo) {
+      showToast("Проверьте даты поездки.", "info");
+      return;
+    }
+    if (!Number.isInteger(guests) || guests < 1 || guests > listing.guests) {
+      showToast("Проверьте количество гостей.", "info");
+      return;
+    }
+    setSending(true);
+    try {
+      await createStayRequest({
+        clientRequestId,
+        listingId: listing.id,
+        dateFrom,
+        dateTo,
+        guests,
+        message,
+      });
+      setSent(true);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Не удалось отправить заявку.", "info");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const openRequest = () => {
+    if (!listing) return;
+    setDateFrom(listing.availableFrom);
+    setDateTo(listing.availableTo);
+    setGuests(1);
+    setMessage("");
+    setClientRequestId(crypto.randomUUID());
+    setSent(false);
+    setRequestOpen(true);
   };
 
   const closeRequest = () => {
     setRequestOpen(false);
     if (sent) {
-      showToast("Демо-запрос отправлен хозяину. В реальном приложении здесь откроется чат.");
+      showToast("Заявка отправлена хозяину.");
     }
     window.setTimeout(() => setSent(false), 300);
   };
@@ -232,7 +272,7 @@ export default function ListingDetail() {
         </div>
 
         <div className={styles.ctaBar}>
-          <Button size="lg" fullWidth onClick={() => setRequestOpen(true)}>
+          <Button size="lg" fullWidth onClick={openRequest}>
             Запросить размещение
           </Button>
         </div>
@@ -257,15 +297,38 @@ export default function ListingDetail() {
             <div className={styles.sentState}>
               <CheckCircle2 size={40} className={styles.sentIcon} />
               <p>
-                Это демо-действие: реальная отправка сообщений появится в следующей версии. {listing.host.name} увидит
-                ваш запрос и свяжется с вами через MAX.
+                {listing.host.name} увидит заявку во входящих. Если хозяин её примет, в разделе
+                «Заявки» станет доступен контакт MAX.
               </p>
             </div>
           ) : (
-            <p className={styles.requestText}>
-              {listing.host.name} получит демо-уведомление о вашем запросе на «{listing.title}». В MVP это
-              имитация действия — настоящий чат подключим позже.
-            </p>
+            <div className={styles.requestForm}>
+              <p className={styles.requestText}>
+                Укажите даты и коротко расскажите {listing.host.name}, зачем едете.
+              </p>
+              <div className={styles.requestDates}>
+                <label>
+                  <span>Заезд</span>
+                  <input type="date" min={listing.availableFrom} max={listing.availableTo} value={dateFrom}
+                    onChange={(event) => setDateFrom(event.target.value)} />
+                </label>
+                <label>
+                  <span>Выезд</span>
+                  <input type="date" min={dateFrom || listing.availableFrom} max={listing.availableTo} value={dateTo}
+                    onChange={(event) => setDateTo(event.target.value)} />
+                </label>
+              </div>
+              <label className={styles.requestField}>
+                <span>Гостей</span>
+                <input type="number" min={1} max={listing.guests} value={guests}
+                  onChange={(event) => setGuests(Number(event.target.value))} />
+              </label>
+              <label className={styles.requestField}>
+                <span>Сообщение</span>
+                <textarea maxLength={2000} rows={4} value={message} placeholder="Например: еду на выходные, люблю музеи и прогулки"
+                  onChange={(event) => setMessage(event.target.value)} />
+              </label>
+            </div>
           )}
         </BottomSheet>
       </div>

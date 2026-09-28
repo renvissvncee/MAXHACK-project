@@ -2,8 +2,16 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Приют API",
-    "version": "0.1.0"
+    "summary": "API mini-app для hospitality exchange в MAX",
+    "description": "Профили, предложения жилья, запросы, отзывы и уведомления. Кроме health endpoints, API требует HttpOnly сессию, полученную после проверки initData MAX. Изменяющие запросы также проверяют Origin.",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "https://64.188.79.42",
+      "description": "Production"
+    }
+  ],
   "paths": {
     "/api/health/live": {
       "get": {

@@ -28,6 +28,7 @@ services:
       - ./.certs:/run/max-certs:ro
   notifications:
     build: ./backend
+    restart: unless-stopped
     env_file:
       - path: ./.env
         required: false

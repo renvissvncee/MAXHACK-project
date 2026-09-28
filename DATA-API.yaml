@@ -1,0 +1,1801 @@
+"openapi": "3.1.0"
+"info":
+  "title": "Приют API"
+  "summary": "API mini-app для hospitality exchange в MAX"
+  "description": "Профили, предложения жилья, запросы, отзывы и уведомления. Кроме health endpoints, API требует HttpOnly сессию, полученную после проверки initData MAX. Изменяющие запросы также проверяют Origin."
+  "version": "1.0.0"
+"servers":
+  -
+    "url": "https://64.188.79.42"
+    "description": "Production"
+"paths":
+  "/api/health/live":
+    "get":
+      "tags":
+        - "health"
+      "summary": "Live"
+      "operationId": "live_api_health_live_get"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/HealthResponse"
+  "/api/health/ready":
+    "get":
+      "tags":
+        - "health"
+      "summary": "Ready"
+      "operationId": "ready_api_health_ready_get"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/HealthResponse"
+        "503":
+          "description": "Database unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/HealthResponse"
+  "/api/auth/max":
+    "post":
+      "tags":
+        - "auth"
+      "summary": "Login"
+      "operationId": "login_api_auth_max_post"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/LoginRequest"
+        "required": true
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProfileResponse"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/auth/logout":
+    "post":
+      "tags":
+        - "auth"
+      "summary": "Logout"
+      "operationId": "logout_api_auth_logout_post"
+      "responses":
+        "204":
+          "description": "Successful Response"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/me":
+    "get":
+      "tags":
+        - "profile"
+      "summary": "Me"
+      "operationId": "me_api_me_get"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProfileResponse"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+    "patch":
+      "tags":
+        - "profile"
+      "summary": "Patch Me"
+      "operationId": "patch_me_api_me_patch"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/ProfilePatch"
+        "required": true
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProfileResponse"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/me/listing":
+    "get":
+      "tags":
+        - "listings"
+      "summary": "Read My Listing"
+      "operationId": "read_my_listing_api_me_listing_get"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/MyListingResponse"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          "description": "Conflict"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+    "put":
+      "tags":
+        - "listings"
+      "summary": "Put My Listing"
+      "description": "Create the user's single offer, or replace its editable fields."
+      "operationId": "put_my_listing_api_me_listing_put"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/ListingInput"
+        "required": true
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ListingResponse"
+        "401":
+          "description": "Unauthorized"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "403":
+          "description": "Forbidden"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "409":
+          "description": "Conflict"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "422":
+          "description": "Unprocessable Content"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+        "503":
+          "description": "Service Unavailable"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+  "/api/listings":
+    "get":
+      "tags":
+        - "listings"
+      "summary": "List Listings"
+      "operationId": "list_listings_api_listings_get"
+      "parameters":
+        -
+          "name": "city"
+          "in": "query"
+          "required": false
+          "schema":
+            "anyOf":
+              -
+                "type": "string"
+                "minLength": 1
+                "maxLength": 120
+              -
+                "type": "null"
+            "title": "City"
+        -
+          "name": "date_from"
+          "in": "query"
+          "required": false
+          "schema":
+            "anyOf":
+              -
+                "type": "string"
+                "format": "date"
+              -
+                "type": "null"
+            "title": "Date From"
+        -
+          "name": "date_to"
+          "in": "query"
+          "required": false
+          "schema":
+            "anyOf":
+              -
+                "type": "string"
+                "format": "date"
+              -
+                "type": "null"
+            "title": "Date To"
+        -
+          "name": "guests"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 8
+            "minimum": 1
+            "default": 1
+            "title": "Guests"
+        -
+          "name": "limit"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 100
+            "minimum": 1
+            "default": 50
+            "title": "Limit"
+        -
+          "name": "offset"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "minimum": 0
+            "default": 0
+            "title": "Offset"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "type": "array"
+                "items":
+                  "$ref": "#/components/schemas/ListingResponse"
+                "title": "Response List Listings Api Listings Get"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/listings/{listing_id}":
+    "get":
+      "tags":
+        - "listings"
+      "summary": "Read Listing"
+      "operationId": "read_listing_api_listings__listing_id__get"
+      "parameters":
+        -
+          "name": "listing_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Listing Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ListingResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+  "/api/requests":
+    "post":
+      "tags":
+        - "requests"
+      "summary": "Create"
+      "operationId": "create_api_requests_post"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/RequestInput"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RequestResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+    "get":
+      "tags":
+        - "requests"
+      "summary": "Collection"
+      "operationId": "collection_api_requests_get"
+      "parameters":
+        -
+          "name": "direction"
+          "in": "query"
+          "required": true
+          "schema":
+            "enum":
+              - "incoming"
+              - "outgoing"
+            "type": "string"
+            "title": "Direction"
+        -
+          "name": "limit"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 100
+            "minimum": 1
+            "default": 50
+            "title": "Limit"
+        -
+          "name": "offset"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "minimum": 0
+            "default": 0
+            "title": "Offset"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "type": "array"
+                "items":
+                  "$ref": "#/components/schemas/RequestResponse"
+                "title": "Response Collection Api Requests Get"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/requests/{request_id}":
+    "get":
+      "tags":
+        - "requests"
+      "summary": "Detail"
+      "operationId": "detail_api_requests__request_id__get"
+      "parameters":
+        -
+          "name": "request_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Request Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RequestResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+    "patch":
+      "tags":
+        - "requests"
+      "summary": "Decide"
+      "operationId": "decide_api_requests__request_id__patch"
+      "parameters":
+        -
+          "name": "request_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Request Id"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/RequestDecision"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RequestResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/requests/{request_id}/contact":
+    "get":
+      "tags":
+        - "requests"
+      "summary": "Contact"
+      "operationId": "contact_api_requests__request_id__contact_get"
+      "parameters":
+        -
+          "name": "request_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Request Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ContactResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "409":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Conflict"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/users/{user_id}/review":
+    "put":
+      "tags":
+        - "reviews"
+      "summary": "Save"
+      "operationId": "save_api_users__user_id__review_put"
+      "parameters":
+        -
+          "name": "user_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "User Id"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/ReviewInput"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ReviewResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+    "get":
+      "tags":
+        - "reviews"
+      "summary": "Own"
+      "operationId": "own_api_users__user_id__review_get"
+      "parameters":
+        -
+          "name": "user_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "User Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "anyOf":
+                  -
+                    "$ref": "#/components/schemas/ReviewResponse"
+                  -
+                    "type": "null"
+                "title": "Response Own Api Users  User Id  Review Get"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/users/{user_id}/reviews":
+    "get":
+      "tags":
+        - "reviews"
+      "summary": "Collection"
+      "operationId": "collection_api_users__user_id__reviews_get"
+      "parameters":
+        -
+          "name": "user_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "User Id"
+        -
+          "name": "limit"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 100
+            "minimum": 1
+            "default": 20
+            "title": "Limit"
+        -
+          "name": "offset"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "minimum": 0
+            "default": 0
+            "title": "Offset"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ReviewPage"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/notifications":
+    "get":
+      "tags":
+        - "notifications"
+      "summary": "Collection"
+      "operationId": "collection_api_notifications_get"
+      "parameters":
+        -
+          "name": "unread_only"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "boolean"
+            "default": false
+            "title": "Unread Only"
+        -
+          "name": "limit"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 100
+            "minimum": 1
+            "default": 20
+            "title": "Limit"
+        -
+          "name": "offset"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "minimum": 0
+            "default": 0
+            "title": "Offset"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/NotificationPage"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/notifications/{notification_id}/read":
+    "post":
+      "tags":
+        - "notifications"
+      "summary": "Read"
+      "operationId": "read_api_notifications__notification_id__read_post"
+      "parameters":
+        -
+          "name": "notification_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Notification Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/NotificationResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/notifications/{notification_id}":
+    "get":
+      "tags":
+        - "notifications"
+      "summary": "Detail"
+      "operationId": "detail_api_notifications__notification_id__get"
+      "parameters":
+        -
+          "name": "notification_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Notification Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/NotificationResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "403":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Forbidden"
+        "404":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Not Found"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+"components":
+  "schemas":
+    "ContactResponse":
+      "properties":
+        "userId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Userid"
+        "maxUserId":
+          "type": "string"
+          "title": "Maxuserid"
+        "username":
+          "anyOf":
+            -
+              "type": "string"
+            -
+              "type": "null"
+          "title": "Username"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "userId"
+        - "maxUserId"
+        - "username"
+      "title": "ContactResponse"
+    "ErrorDetail":
+      "properties":
+        "code":
+          "type": "string"
+          "title": "Code"
+        "message":
+          "type": "string"
+          "title": "Message"
+      "type": "object"
+      "required":
+        - "code"
+        - "message"
+      "title": "ErrorDetail"
+    "ErrorResponse":
+      "properties":
+        "error":
+          "$ref": "#/components/schemas/ErrorDetail"
+      "type": "object"
+      "required":
+        - "error"
+      "title": "ErrorResponse"
+    "HealthResponse":
+      "properties":
+        "status":
+          "type": "string"
+          "title": "Status"
+      "type": "object"
+      "required":
+        - "status"
+      "title": "HealthResponse"
+    "HostSummary":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "name":
+          "type": "string"
+          "title": "Name"
+        "city":
+          "type": "string"
+          "title": "City"
+        "bio":
+          "type": "string"
+          "title": "Bio"
+        "interests":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Interests"
+        "avatarEmoji":
+          "type": "string"
+          "title": "Avataremoji"
+        "avatarColor":
+          "type": "string"
+          "title": "Avatarcolor"
+        "photoUrl":
+          "anyOf":
+            -
+              "type": "string"
+            -
+              "type": "null"
+          "title": "Photourl"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "name"
+        - "city"
+        - "bio"
+        - "interests"
+        - "avatarEmoji"
+        - "avatarColor"
+        - "photoUrl"
+      "title": "HostSummary"
+    "ListingInput":
+      "properties":
+        "city":
+          "type": "string"
+          "maxLength": 120
+          "minLength": 1
+          "title": "City"
+        "title":
+          "type": "string"
+          "maxLength": 120
+          "minLength": 1
+          "title": "Title"
+        "shortDescription":
+          "type": "string"
+          "maxLength": 240
+          "minLength": 1
+          "title": "Shortdescription"
+        "description":
+          "type": "string"
+          "maxLength": 4000
+          "minLength": 1
+          "title": "Description"
+        "guests":
+          "type": "integer"
+          "maximum": 8.0
+          "minimum": 1.0
+          "title": "Guests"
+        "accommodationType":
+          "type": "string"
+          "pattern": "^(room|apartment|house|sofa)$"
+          "title": "Accommodationtype"
+        "availableFrom":
+          "type": "string"
+          "format": "date"
+          "title": "Availablefrom"
+        "availableTo":
+          "type": "string"
+          "format": "date"
+          "title": "Availableto"
+        "tags":
+          "items":
+            "type": "string"
+            "maxLength": 80
+            "minLength": 1
+          "type": "array"
+          "maxItems": 12
+          "title": "Tags"
+        "amenities":
+          "items":
+            "type": "string"
+            "maxLength": 80
+            "minLength": 1
+          "type": "array"
+          "maxItems": 20
+          "title": "Amenities"
+        "rules":
+          "items":
+            "type": "string"
+            "maxLength": 80
+            "minLength": 1
+          "type": "array"
+          "maxItems": 20
+          "title": "Rules"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "city"
+        - "title"
+        - "shortDescription"
+        - "description"
+        - "guests"
+        - "accommodationType"
+        - "availableFrom"
+        - "availableTo"
+      "title": "ListingInput"
+    "ListingResponse":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "host":
+          "$ref": "#/components/schemas/HostSummary"
+        "city":
+          "type": "string"
+          "title": "City"
+        "title":
+          "type": "string"
+          "title": "Title"
+        "shortDescription":
+          "type": "string"
+          "title": "Shortdescription"
+        "description":
+          "type": "string"
+          "title": "Description"
+        "guests":
+          "type": "integer"
+          "title": "Guests"
+        "accommodationType":
+          "type": "string"
+          "title": "Accommodationtype"
+        "availableFrom":
+          "type": "string"
+          "format": "date"
+          "title": "Availablefrom"
+        "availableTo":
+          "type": "string"
+          "format": "date"
+          "title": "Availableto"
+        "tags":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Tags"
+        "amenities":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Amenities"
+        "rules":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Rules"
+        "rating":
+          "anyOf":
+            -
+              "type": "number"
+            -
+              "type": "null"
+          "title": "Rating"
+        "reviewsCount":
+          "type": "integer"
+          "title": "Reviewscount"
+        "photos":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Photos"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "host"
+        - "city"
+        - "title"
+        - "shortDescription"
+        - "description"
+        - "guests"
+        - "accommodationType"
+        - "availableFrom"
+        - "availableTo"
+        - "tags"
+        - "amenities"
+        - "rules"
+        - "rating"
+        - "reviewsCount"
+        - "photos"
+      "title": "ListingResponse"
+    "LoginRequest":
+      "properties":
+        "initData":
+          "type": "string"
+          "maxLength": 16384
+          "minLength": 1
+          "title": "Initdata"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "initData"
+      "title": "LoginRequest"
+    "MyListingResponse":
+      "properties":
+        "listing":
+          "anyOf":
+            -
+              "$ref": "#/components/schemas/ListingResponse"
+            -
+              "type": "null"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "listing"
+      "title": "MyListingResponse"
+    "NotificationPage":
+      "properties":
+        "unreadCount":
+          "type": "integer"
+          "title": "Unreadcount"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/NotificationResponse"
+          "type": "array"
+          "title": "Items"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "unreadCount"
+        - "items"
+      "title": "NotificationPage"
+    "NotificationResponse":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "kind":
+          "type": "string"
+          "enum":
+            - "request_created"
+            - "request_accepted"
+            - "request_declined"
+            - "review_created"
+          "title": "Kind"
+        "text":
+          "type": "string"
+          "title": "Text"
+        "targetType":
+          "type": "string"
+          "enum":
+            - "request"
+            - "user_reviews"
+          "title": "Targettype"
+        "targetId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Targetid"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Createdat"
+        "readAt":
+          "anyOf":
+            -
+              "type": "string"
+              "format": "date-time"
+            -
+              "type": "null"
+          "title": "Readat"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "kind"
+        - "text"
+        - "targetType"
+        - "targetId"
+        - "createdAt"
+        - "readAt"
+      "title": "NotificationResponse"
+    "ProfilePatch":
+      "properties":
+        "name":
+          "anyOf":
+            -
+              "type": "string"
+              "maxLength": 120
+              "minLength": 1
+            -
+              "type": "null"
+          "title": "Name"
+        "city":
+          "anyOf":
+            -
+              "type": "string"
+              "maxLength": 120
+              "minLength": 1
+            -
+              "type": "null"
+          "title": "City"
+        "bio":
+          "anyOf":
+            -
+              "type": "string"
+              "maxLength": 2000
+            -
+              "type": "null"
+          "title": "Bio"
+        "interests":
+          "anyOf":
+            -
+              "items":
+                "type": "string"
+                "maxLength": 50
+                "minLength": 1
+              "type": "array"
+              "maxItems": 20
+            -
+              "type": "null"
+          "title": "Interests"
+        "avatarEmoji":
+          "anyOf":
+            -
+              "type": "string"
+              "maxLength": 32
+              "minLength": 1
+            -
+              "type": "null"
+          "title": "Avataremoji"
+        "avatarColor":
+          "anyOf":
+            -
+              "type": "string"
+              "pattern": "^[a-zA-Z0-9_-]{1,32}$"
+            -
+              "type": "null"
+          "title": "Avatarcolor"
+      "additionalProperties": false
+      "type": "object"
+      "title": "ProfilePatch"
+    "ProfileResponse":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "name":
+          "type": "string"
+          "title": "Name"
+        "city":
+          "type": "string"
+          "title": "City"
+        "bio":
+          "type": "string"
+          "title": "Bio"
+        "interests":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Interests"
+        "avatarEmoji":
+          "type": "string"
+          "title": "Avataremoji"
+        "avatarColor":
+          "type": "string"
+          "title": "Avatarcolor"
+        "photoUrl":
+          "anyOf":
+            -
+              "type": "string"
+            -
+              "type": "null"
+          "title": "Photourl"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Createdat"
+        "profileCompleted":
+          "type": "boolean"
+          "title": "Profilecompleted"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "name"
+        - "city"
+        - "bio"
+        - "interests"
+        - "avatarEmoji"
+        - "avatarColor"
+        - "photoUrl"
+        - "createdAt"
+        - "profileCompleted"
+      "title": "ProfileResponse"
+    "RequestDecision":
+      "properties":
+        "status":
+          "type": "string"
+          "enum":
+            - "accepted"
+            - "declined"
+          "title": "Status"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "status"
+      "title": "RequestDecision"
+    "RequestInput":
+      "properties":
+        "clientRequestId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Clientrequestid"
+        "listingId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Listingid"
+        "dateFrom":
+          "type": "string"
+          "format": "date"
+          "title": "Datefrom"
+        "dateTo":
+          "type": "string"
+          "format": "date"
+          "title": "Dateto"
+        "guests":
+          "type": "integer"
+          "maximum": 8.0
+          "minimum": 1.0
+          "title": "Guests"
+        "message":
+          "type": "string"
+          "maxLength": 2000
+          "title": "Message"
+          "default": ""
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "clientRequestId"
+        - "listingId"
+        - "dateFrom"
+        - "dateTo"
+        - "guests"
+      "title": "RequestInput"
+    "RequestResponse":
+      "properties":
+        "clientRequestId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Clientrequestid"
+        "listingId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Listingid"
+        "dateFrom":
+          "type": "string"
+          "format": "date"
+          "title": "Datefrom"
+        "dateTo":
+          "type": "string"
+          "format": "date"
+          "title": "Dateto"
+        "guests":
+          "type": "integer"
+          "maximum": 8.0
+          "minimum": 1.0
+          "title": "Guests"
+        "message":
+          "type": "string"
+          "maxLength": 2000
+          "title": "Message"
+          "default": ""
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "status":
+          "type": "string"
+          "enum":
+            - "pending"
+            - "accepted"
+            - "declined"
+          "title": "Status"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Createdat"
+        "decidedAt":
+          "anyOf":
+            -
+              "type": "string"
+              "format": "date-time"
+            -
+              "type": "null"
+          "title": "Decidedat"
+        "guest":
+          "$ref": "#/components/schemas/HostSummary"
+        "host":
+          "$ref": "#/components/schemas/HostSummary"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "clientRequestId"
+        - "listingId"
+        - "dateFrom"
+        - "dateTo"
+        - "guests"
+        - "id"
+        - "status"
+        - "createdAt"
+        - "decidedAt"
+        - "guest"
+        - "host"
+      "title": "RequestResponse"
+    "ReviewInput":
+      "properties":
+        "rating":
+          "type": "integer"
+          "maximum": 5.0
+          "minimum": 1.0
+          "title": "Rating"
+        "text":
+          "type": "string"
+          "maxLength": 2000
+          "title": "Text"
+          "default": ""
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "rating"
+      "title": "ReviewInput"
+    "ReviewPage":
+      "properties":
+        "rating":
+          "anyOf":
+            -
+              "type": "number"
+            -
+              "type": "null"
+          "title": "Rating"
+        "reviewsCount":
+          "type": "integer"
+          "title": "Reviewscount"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/ReviewResponse"
+          "type": "array"
+          "title": "Items"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "rating"
+        - "reviewsCount"
+        - "items"
+      "title": "ReviewPage"
+    "ReviewResponse":
+      "properties":
+        "rating":
+          "type": "integer"
+          "maximum": 5.0
+          "minimum": 1.0
+          "title": "Rating"
+        "text":
+          "type": "string"
+          "maxLength": 2000
+          "title": "Text"
+          "default": ""
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "subjectId":
+          "type": "string"
+          "format": "uuid"
+          "title": "Subjectid"
+        "author":
+          "$ref": "#/components/schemas/HostSummary"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Createdat"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Updatedat"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "rating"
+        - "id"
+        - "subjectId"
+        - "author"
+        - "createdAt"
+        - "updatedAt"
+      "title": "ReviewResponse"

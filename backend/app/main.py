@@ -38,7 +38,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await engine.dispose()
             logging.getLogger(__name__).info("backend_stopped")
 
-    app = FastAPI(title="Приют API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="Приют API",
+        summary="API mini-app для hospitality exchange в MAX",
+        description=(
+            "Профили, предложения жилья, запросы, отзывы и уведомления. "
+            "Кроме health endpoints, API требует HttpOnly сессию, полученную после "
+            "проверки initData MAX. Изменяющие запросы также проверяют Origin."
+        ),
+        version="1.0.0",
+        servers=[{"url": "https://64.188.79.42", "description": "Production"}],
+        lifespan=lifespan,
+    )
     app.add_middleware(CORSMiddleware, allow_origins=configuration.allowed_origins,
                        allow_credentials=True, allow_methods=["GET", "POST", "PATCH", "PUT"],
                        allow_headers=["Content-Type"])
@@ -61,5 +72,3 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(reviews_router)
     app.include_router(notifications_router)
     return app
-
-

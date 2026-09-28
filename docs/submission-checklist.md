@@ -7,6 +7,7 @@
 - Frontend build/lint: `npm --prefix frontend run build` и `npm --prefix frontend run lint`.
 - Актуальность API-артефактов: `backend/.venv/bin/python scripts/export_openapi.py --check`.
 - Readiness production: `curl -fsS https://64.188.79.42/api/health/ready`.
+- Публичные Swagger/OpenAPI: `https://64.188.79.42/docs` и `https://64.188.79.42/openapi.json`.
 - Состояние delivery worker: `docker compose -f compose.yaml -f compose.full.yaml run --rm --no-deps notifications python -m app.workers.notifications --status`.
 
 ## Только вручную в MAX

@@ -6,6 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt && useradd --create-home appu
 COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini .
+RUN mkdir -p /home/appuser/.state && chown appuser:appuser /home/appuser/.state
 USER appuser
 EXPOSE 8000
 CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

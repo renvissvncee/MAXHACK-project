@@ -1,6 +1,6 @@
 import type { UserProfileDraft } from "../../../types/user";
 import InterestChips from "./InterestChips";
-import PhotoPicker from "./PhotoPicker";
+import Avatar from "../../../components/Avatar/Avatar";
 import styles from "./ProfileFields.module.css";
 
 interface ProfileFieldsProps {
@@ -17,7 +17,8 @@ export default function ProfileFields({ value, onChange }: ProfileFieldsProps) {
 
   return (
     <div className={styles.form}>
-      <PhotoPicker photo={value.photo} name={value.name} onChange={(photo) => onChange({ ...value, photo })} />
+      <Avatar photo={value.photo} name={value.name} size={72} />
+      <p>Фото из аккаунта MAX. Загрузка своего фото пока недоступна.</p>
 
       <label className={styles.field}>
         <span className={styles.label}>Имя</span>

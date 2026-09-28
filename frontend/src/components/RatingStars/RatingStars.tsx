@@ -2,12 +2,13 @@ import { Star } from "lucide-react";
 import styles from "./RatingStars.module.css";
 
 interface RatingStarsProps {
-  rating: number;
+  rating: number | null;
   reviewsCount?: number;
   size?: number;
 }
 
 export default function RatingStars({ rating, reviewsCount, size = 14 }: RatingStarsProps) {
+  if (rating === null) return null;
   return (
     <span className={styles.rating}>
       <Star size={size} className={styles.star} fill="currentColor" strokeWidth={0} />

@@ -1,0 +1,9 @@
+services:
+  edge:
+    image: nginx:stable-alpine
+    container_name: maxhack-edge
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./deploy/nginx/maxhack.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./letsencrypt:/etc/letsencrypt:ro

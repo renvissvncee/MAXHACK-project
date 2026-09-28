@@ -1,0 +1,8 @@
+# Optional local testing only. Requires compose.yaml and compose.full.yaml.
+services:
+  tunnel:
+    build: ./deploy/tunnel
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy

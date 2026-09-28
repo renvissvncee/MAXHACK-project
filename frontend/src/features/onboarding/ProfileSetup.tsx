@@ -14,6 +14,7 @@ export default function ProfileSetup() {
   const { introSeen } = useIntroSeen();
 
   const [draft, setDraft] = useState<UserProfileDraft>({ name: "", city: "", bio: "", interests: [], photo: null });
+  const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
   const seededFromUser = useRef(false);
 
@@ -33,8 +34,9 @@ export default function ProfileSetup() {
   const handleSubmit = async () => {
     setTouched(true);
     if (!isValid) return;
-    await completeOnboarding(draft);
-    navigate("/home", { replace: true });
+    setError("");
+    try { await completeOnboarding(draft); navigate("/home", { replace: true }); }
+    catch (error) { setError(error instanceof Error ? error.message : "Не удалось сохранить профиль"); }
   };
 
   return (
@@ -45,6 +47,7 @@ export default function ProfileSetup() {
           <p className={styles.subtitle}>
             Часть данных мы уже получили из вашего аккаунта MAX — проверьте и при желании измените их.
           </p>
+          {error && <p role="alert">{error}</p>}
           <ProfileFields value={draft} onChange={setDraft} />
           {touched && !isValid && (
             <p className={styles.error}>Заполните имя, город и выберите хотя бы один интерес.</p>

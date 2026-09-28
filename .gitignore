@@ -24,3 +24,14 @@ __pycache__/
 
 # Local polling cursor
 .state/
+
+# Local trusted CA bundle for Docker (exported from the host)
+.certs/
+
+# Server-managed ACME certificates and state
+letsencrypt/
+letsencrypt-lib/
+letsencrypt-log/
+letsencrypt-staging/
+letsencrypt-staging-lib/
+letsencrypt-staging-log/

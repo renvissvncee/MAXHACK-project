@@ -14,6 +14,8 @@ type Status = "loading" | "success" | "empty" | "error";
 
 function readFiltersFromParams(params: URLSearchParams): SearchFormState {
   return {
+    dateFrom: params.get("date_from") ?? "",
+    dateTo: params.get("date_to") ?? "",
     city: params.get("city") ?? "",
     guests: Number(params.get("guests") ?? 1) || 1,
     accommodationType: (params.get("type") as AccommodationType | null) ?? "any",
@@ -33,10 +35,9 @@ export default function SearchResults() {
   const runSearch = useCallback(async (current: SearchFormState) => {
     setStatus("loading");
     try {
-      if (current.city.trim().toLowerCase() === "ошибка") {
-        await new Promise((_, reject) => setTimeout(() => reject(new Error("demo error")), 500));
-      }
       const results = await searchListings({
+        dateFrom: current.dateFrom || undefined,
+        dateTo: current.dateTo || undefined,
         city: current.city || undefined,
         guests: current.guests > 1 ? current.guests : undefined,
         accommodationType: current.accommodationType === "any" ? undefined : current.accommodationType,
@@ -56,6 +57,8 @@ export default function SearchResults() {
 
   const applyFilters = (next: SearchFormState) => {
     const params = new URLSearchParams();
+    if (next.dateFrom) params.set("date_from", next.dateFrom);
+    if (next.dateTo) params.set("date_to", next.dateTo);
     if (next.city) params.set("city", next.city);
     if (next.guests > 1) params.set("guests", String(next.guests));
     if (next.accommodationType !== "any") params.set("type", next.accommodationType);

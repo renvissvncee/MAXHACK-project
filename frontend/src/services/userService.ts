@@ -1,11 +1,7 @@
-import { userRepository } from "../repositories/MockUserRepository";
+import { userRepository } from "../repositories/ApiUserRepository";
 import type { UserProfileDraft } from "../types/user";
 
-/**
- * Thin facade the UI layer talks to. Nothing here knows it's backed by
- * localStorage — swapping `userRepository`'s import for an `ApiUserRepository`
- * (real HTTP calls to the backend once it's ready) is the only change needed.
- */
+// UI facade backed by the authenticated HTTP repository.
 export const userService = {
   getCurrentUser: () => userRepository.getCurrentUser(),
   updateProfile: (patch: Partial<UserProfileDraft>) => userRepository.updateProfile(patch),

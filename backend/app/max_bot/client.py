@@ -70,3 +70,12 @@ class MaxClient:
     async def send_message(self, chat_id: int, body: dict):
         # No automatic POST retry: a timeout does not prove the message was not sent.
         return await self.request("POST", "/messages", params={"chat_id": chat_id}, json=body)
+
+    async def send_user_message(self, user_id: int, body: dict):
+        data = await self.request("POST", "/messages", params={"user_id": user_id}, json=body)
+        message = data.get("message")
+        body = message.get("body") if isinstance(message, dict) else None
+        mid = body.get("mid") if isinstance(body, dict) else None
+        if not isinstance(mid, str) or not mid or len(mid) > 255:
+            raise MaxAPIError(reason="invalid_response")
+        return mid

@@ -317,3 +317,9 @@
   background-size: 300% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
+
+@media (max-width: 360px) {
+  .requestDates {
+    grid-template-columns: 1fr;
+  }
+}

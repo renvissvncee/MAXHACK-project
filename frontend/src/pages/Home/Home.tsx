@@ -133,7 +133,7 @@ export default function Home() {
       <header className={styles.header}>
         <button type="button" className={styles.profileLink} onClick={() => navigate("/profile")}>
           <Avatar photo={user.photo} name={user.name} size={42} />
-          <div>
+          <div className={styles.profileText}>
             <p className={styles.greeting}>Привет, {user.name.split(" ")[0] || "путешественник"} 👋</p>
             <p className={styles.location}>Ваш город: {user.locality?.shortLabel ?? user.city}</p>
           </div>

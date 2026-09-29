@@ -40,7 +40,7 @@ export default function BottomNav() {
           to={to}
           className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ""}`}
         >
-          <Icon size={22} strokeWidth={2.1} />
+          <Icon size={25} strokeWidth={2} />
           {to === "/notifications" && unreadCount > 0 && (
             <span className={styles.badge}>{unreadCount > 99 ? "99+" : unreadCount}</span>
           )}

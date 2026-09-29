@@ -168,11 +168,19 @@ erDiagram
 
 ## 8. Тестовые данные (seeds/fixtures)
 
-Seed-скриптов, `seeds/`, `fixtures/`, `testdata/` и команды импорта начальных данных не найдено. Демо-аккаунты из `docs/demo-scenario.md` вводятся вручную через два MAX test accounts; автозагрузки нет.
+В MVP есть опциональный синтетический seed-набор для демонстрации каталога и UI. Он содержит 9 вымышленных профилей, 6 предложений в разных городах и форматах, 5 запросов со всеми статусами, 6 отзывов и 5 уведомлений. Карточки помечены тегом **«Демо-данные»**.
 
-Backend tests содержат синтетические подписанные `initData` и тестовый `TEST_TOKEN` в `backend/tests/auth_helpers.py`. Это не действительные MAX credentials. PostgreSQL integration tests требуют отдельную БД с именем, оканчивающимся на `_test`; без `TEST_DATABASE_URL` тесты пропускаются. `frontend/src/data/listings.ts` содержит моковые карточки, но основной frontend получает данные через API и эти записи автоматически не импортирует.
+> **Важно:** все профили, тексты, MAX ID, запросы, отзывы и уведомления в этом наборе тестовые и синтетические. Они не получены из внешней информационной системы, не являются реальными учётными записями MAX и не подходят для проверки реальной доставки уведомлений или контакта после мэтча. Для сквозной проверки MAX используются два реальных тестовых аккаунта из `docs/demo-scenario.md`.
 
-Пользовательских учётных записей, рабочих токенов и начальных записей по умолчанию нет. Синтетические ID и тестовый ключ применимы только в автоматических тестах.
+После запуска миграций загрузите набор отдельной явной командой:
+
+```bash
+docker compose run --rm backend python -m app.seed_demo --confirm-test-data
+```
+
+Команда не запускается автоматически и требует флаг-подтверждение. Повторный запуск обновляет только записи этого детерминированного набора и не очищает остальную БД. Синтетические уведомления сразу помечаются как доставленные, чтобы worker не пытался отправить их в MAX.
+
+Backend tests также содержат синтетические подписанные `initData` и `TEST_TOKEN` в `backend/tests/auth_helpers.py`. Это не действительные MAX credentials. PostgreSQL integration tests требуют отдельную БД с именем, оканчивающимся на `_test`; без `TEST_DATABASE_URL` тесты пропускаются.
 
 ## 9. Шаги запуска
 
@@ -217,7 +225,7 @@ Backend tests содержат синтетические подписанные
    .venv/bin/python -m alembic upgrade head
    ```
 
-   Автоматической загрузки seed-данных нет.
+   Синтетические demo-данные не загружаются автоматически; для их явной загрузки см. раздел 8.
 6. Локальный backend с hot reload, из `backend`:
 
    ```bash
@@ -340,5 +348,5 @@ PostgreSQL тестам нужна отдельная БД в `TEST_DATABASE_URL
 | Переменные, версии зависимостей и команды | [.env.example](.env.example), [backend/.env.example](backend/.env.example), [backend/app/config.py](backend/app/config.py), [backend/requirements.in](backend/requirements.in), [backend/requirements.txt](backend/requirements.txt), [backend/requirements-dev.in](backend/requirements-dev.in), [backend/requirements-dev.txt](backend/requirements-dev.txt), [frontend/package.json](frontend/package.json), [frontend/vite.config.ts](frontend/vite.config.ts) |
 | Назначение, маршруты, сессии, health, MAX вызовы | [backend/app/main.py](backend/app/main.py), [backend/app/api/health.py](backend/app/api/health.py), [backend/app/api/auth.py](backend/app/api/auth.py), [backend/app/api/listings.py](backend/app/api/listings.py), [backend/app/api/requests.py](backend/app/api/requests.py), [backend/app/max_bot/polling.py](backend/app/max_bot/polling.py), [backend/app/max_bot/handlers.py](backend/app/max_bot/handlers.py), [backend/app/workers/notifications.py](backend/app/workers/notifications.py), [frontend/src/App.tsx](frontend/src/App.tsx), [frontend/src/main.tsx](frontend/src/main.tsx) |
 | Схема БД, миграции и состояние | [backend/app/models.py](backend/app/models.py), [backend/migrations/versions/0001_users_sessions.py](backend/migrations/versions/0001_users_sessions.py), [backend/migrations/versions/0002_listings.py](backend/migrations/versions/0002_listings.py), [backend/migrations/versions/0003_stay_requests.py](backend/migrations/versions/0003_stay_requests.py), [backend/migrations/versions/0004_reviews.py](backend/migrations/versions/0004_reviews.py), [backend/migrations/versions/0005_notifications.py](backend/migrations/versions/0005_notifications.py), [backend/migrations/env.py](backend/migrations/env.py) |
-| Тесты и синтетические fixtures | [backend/tests/test_auth_validation.py](backend/tests/test_auth_validation.py), [backend/tests/test_auth_postgres.py](backend/tests/test_auth_postgres.py), [backend/tests/test_max_bot.py](backend/tests/test_max_bot.py), [frontend/tests/api.test.mjs](frontend/tests/api.test.mjs), [frontend/tests/requests.test.mjs](frontend/tests/requests.test.mjs), [frontend/tests/notifications-reviews.test.mjs](frontend/tests/notifications-reviews.test.mjs), [backend/tests/auth_helpers.py](backend/tests/auth_helpers.py), [scripts/check_backend.py](scripts/check_backend.py), [frontend/src/data/listings.ts](frontend/src/data/listings.ts) |
+| Тесты и синтетические fixtures | [backend/app/seed_demo.py](backend/app/seed_demo.py), [backend/tests/test_seed_demo.py](backend/tests/test_seed_demo.py), [backend/tests/test_auth_validation.py](backend/tests/test_auth_validation.py), [backend/tests/test_auth_postgres.py](backend/tests/test_auth_postgres.py), [backend/tests/test_max_bot.py](backend/tests/test_max_bot.py), [frontend/tests/api.test.mjs](frontend/tests/api.test.mjs), [frontend/tests/requests.test.mjs](frontend/tests/requests.test.mjs), [frontend/tests/notifications-reviews.test.mjs](frontend/tests/notifications-reviews.test.mjs), [backend/tests/auth_helpers.py](backend/tests/auth_helpers.py), [scripts/check_backend.py](scripts/check_backend.py) |
 | Proxy, запуск, ограничения MAX и демо | [frontend/nginx.conf](frontend/nginx.conf), [deploy/nginx/maxhack.conf](deploy/nginx/maxhack.conf), [docs/local-integration.md](docs/local-integration.md), [docs/frontend-api.md](docs/frontend-api.md), [docs/demo-scenario.md](docs/demo-scenario.md), [backend/README.md](backend/README.md) |

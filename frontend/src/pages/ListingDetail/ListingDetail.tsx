@@ -4,7 +4,6 @@ import {
   BedDouble,
   Calendar,
   CheckCircle2,
-  Heart,
   ListChecks,
   MessageSquareText,
   Users,
@@ -19,7 +18,6 @@ import RatingStars from "../../components/RatingStars/RatingStars";
 import StateView from "../../components/StateView/StateView";
 import Tag from "../../components/Tag/Tag";
 import { useToast } from "../../context/ToastContext";
-import { isFavorite, toggleFavorite } from "../../services/favoritesService";
 import { getListingById } from "../../services/listingsService";
 import { createStayRequest } from "../../services/requestsService";
 import { accommodationTypeLabels, type Listing } from "../../types/listing";
@@ -38,7 +36,6 @@ export default function ListingDetail() {
   const [status, setStatus] = useState<Status>("loading");
   const [listing, setListing] = useState<Listing | null>(null);
   const [activePhoto, setActivePhoto] = useState(0);
-  const [favorite, setFavorite] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -56,7 +53,6 @@ export default function ListingDetail() {
       if (cancelled) return;
       if (result) {
         setListing(result);
-        setFavorite(isFavorite(result.id));
         setStatus("success");
       } else {
         setStatus("error");
@@ -66,11 +62,6 @@ export default function ListingDetail() {
       cancelled = true;
     };
   }, [id]);
-
-  const handleFavorite = () => {
-    if (!listing) return;
-    setFavorite(toggleFavorite(listing.id));
-  };
 
   const handleRequest = async () => {
     if (!listing || !dateFrom || !dateTo || dateTo < dateFrom || dateFrom < today()
@@ -165,15 +156,6 @@ export default function ListingDetail() {
           <div className={styles.galleryTop}>
             <button type="button" className={styles.iconCircle} onClick={() => navigate(-1)} aria-label="Назад">
               <ArrowLeft size={20} />
-            </button>
-            <button
-              type="button"
-              className={styles.iconCircle}
-              data-active={favorite || undefined}
-              onClick={handleFavorite}
-              aria-label="В избранное"
-            >
-              <Heart size={19} fill={favorite ? "currentColor" : "none"} />
             </button>
           </div>
           {listing.photos.length > 1 && (

@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 from sqlalchemy import select, or_
 from app.errors import AppError
+from app.max_bot.client import MaxAPIError, MaxClient
 from app.models import StayRequest, Listing, User
 from app.schemas.listings import HostSummary
 from app.schemas.localities import LocalityResponse
@@ -91,9 +92,27 @@ async def list_requests(db, user, direction, limit, offset):
     return [await response(db, row) for row in rows]
 
 
-async def get_contact(db, user, request_id):
+async def get_contact(db, user, request_id, settings, transport=None):
     row = await participant_request(db, user, request_id)
     if row.status != "accepted":
         raise AppError("match_required", "Контакт доступен после принятия запроса.", 403)
     other = await db.get(User, row.host_id if user.id == row.guest_id else row.guest_id)
+    if not settings.max_bot_token or not settings.max_bot_token.get_secret_value():
+        raise AppError("contact_not_configured", "Отправка контакта через MAX пока не настроена.", 503)
+    # A raw MAX ID/username in our own UI is useless — the user can't act on
+    # it. A `contact` attachment from the bot is a native, tappable card
+    # (works even without a username) that opens the other person's MAX
+    # profile/chat directly, so we push it to the caller instead of
+    # displaying it ourselves.
+    body = {
+        "text": f"Контакт для вашей поездки в «Приюте»: {other.name}.",
+        "attachments": [{"type": "contact", "payload": {"name": other.name, "contact_id": str(other.max_user_id)}}],
+    }
+    try:
+        async with MaxClient(settings.max_bot_token.get_secret_value(), transport) as client:
+            await client.send_user_message(user.max_user_id, body)
+    except MaxAPIError as error:
+        logger.warning("contact_delivery_failed request_id=%s status=%s reason=%s",
+                       request_id, error.status, error.reason)
+        raise AppError("contact_delivery_failed", "Не удалось отправить контакт в MAX. Попробуйте ещё раз.", 502) from error
     return ContactResponse(user_id=other.id, max_user_id=str(other.max_user_id), username=other.max_username)

@@ -1038,6 +1038,16 @@
             },
             "description": "Unprocessable Content"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -1159,6 +1169,16 @@
             },
             "description": "Unprocessable Content"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -1251,6 +1271,16 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
           },
           "503": {
             "content": {
@@ -1353,6 +1383,16 @@
             },
             "description": "Unprocessable Content"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -1367,12 +1407,12 @@
       }
     },
     "/api/requests/{request_id}/contact": {
-      "get": {
+      "post": {
         "tags": [
           "requests"
         ],
         "summary": "Contact",
-        "operationId": "contact_api_requests__request_id__contact_get",
+        "operationId": "contact_api_requests__request_id__contact_post",
         "parameters": [
           {
             "name": "request_id",
@@ -1445,6 +1485,16 @@
               }
             },
             "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
           },
           "503": {
             "content": {

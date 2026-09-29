@@ -28,7 +28,7 @@ test('creates a real stay request with its idempotency key', async () => {
   assert.equal((await createStayRequest(input)).id, 'request-id');
 });
 
-test('loads, decides and reveals contacts through participant-only endpoints', async () => {
+test('loads, decides and sends contacts through participant-only endpoints', async () => {
   const calls = [];
   globalThis.fetch = async (url, options = {}) => {
     calls.push([url, options.method]);
@@ -45,6 +45,6 @@ test('loads, decides and reveals contacts through participant-only endpoints', a
   assert.deepEqual(calls, [
     ['/api/requests?direction=incoming&limit=100', undefined],
     ['/api/requests/request-id', 'PATCH'],
-    ['/api/requests/request-id/contact', undefined],
+    ['/api/requests/request-id/contact', 'POST'],
   ]);
 });

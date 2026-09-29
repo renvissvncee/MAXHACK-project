@@ -173,15 +173,14 @@
   background: var(--color-success-soft);
   color: var(--color-success);
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
-.contact strong {
-  font-size: 13px;
-  user-select: all;
+.contact svg {
+  flex-shrink: 0;
 }
 
 @media (max-width: 370px) {

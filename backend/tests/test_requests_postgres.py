@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
@@ -25,6 +26,8 @@ def test_scenario_and_concurrency(database):
                         allowed_origins=["http://localhost:5173"], _env_file=None)
     identities = [uuid4().int % (2**60) for _ in range(3)]
     with TestClient(create_app(settings)) as c:
+        c.app.state.max_transport = httpx.MockTransport(
+            lambda request: httpx.Response(200, json={"message": {"body": {"mid": "test-mid"}}}))
         host = login(c, identities[0]); hc = dict(c.cookies)
         c.patch("/api/me", headers=ORIGIN, json=locality_patch("Москва", interests=["Кино"]))
         offer = c.put("/api/me/listing", headers=ORIGIN, json=OFFER).json()
@@ -42,15 +45,15 @@ def test_scenario_and_concurrency(database):
         assert row["status"] == "pending" and row["decidedAt"] is None
         assert row["host"]["id"] == host["id"] and row["guest"]["id"] == guest["id"]
         assert "maxUserId" not in r.text and "username" not in r.text
-        assert c.get(f"/api/requests/{rid}/contact").status_code == 403
+        assert c.post(f"/api/requests/{rid}/contact", headers=ORIGIN).status_code == 403
         assert c.patch(f"/api/requests/{rid}", headers=ORIGIN, json={"status": "accepted"}).status_code == 403
         assert c.post("/api/requests", headers=ORIGIN, json=data).json()["id"] == rid
         assert c.post("/api/requests", headers=ORIGIN, json={**data, "message": "Другое"}).status_code == 409
         assert c.get("/api/requests?direction=outgoing").json()[0]["id"] == rid
         second = c.post("/api/requests", headers=ORIGIN, json={**data, "clientRequestId": str(uuid4())}).json()["id"]
         c.cookies.clear(); login(c, identities[2])
-        for suffix in ("", "/contact"):
-            assert c.get(f"/api/requests/{rid}{suffix}").status_code == 404
+        assert c.get(f"/api/requests/{rid}").status_code == 404
+        assert c.post(f"/api/requests/{rid}/contact", headers=ORIGIN).status_code == 404
         assert c.patch(f"/api/requests/{rid}", headers=ORIGIN, json={"status": "accepted"}).status_code == 404
         assert c.get("/api/requests?direction=incoming").json() == []
         c.cookies.clear(); c.cookies.update(hc)
@@ -59,9 +62,9 @@ def test_scenario_and_concurrency(database):
         assert accepted.status_code == 200 and accepted.json()["decidedAt"]
         assert c.patch(f"/api/requests/{rid}", headers=ORIGIN, json={"status": "accepted"}).json() == accepted.json()
         assert c.patch(f"/api/requests/{rid}", headers=ORIGIN, json={"status": "declined"}).status_code == 409
-        assert c.get(f"/api/requests/{rid}/contact").json() == {"userId": guest["id"], "maxUserId": str(identities[1]), "username": None}
+        assert c.post(f"/api/requests/{rid}/contact", headers=ORIGIN).json() == {"userId": guest["id"], "maxUserId": str(identities[1]), "username": None}
         assert c.patch(f"/api/requests/{second}", headers=ORIGIN, json={"status": "declined"}).status_code == 200
-        assert c.get(f"/api/requests/{second}/contact").status_code == 403
+        assert c.post(f"/api/requests/{second}/contact", headers=ORIGIN).status_code == 403
         assert c.get("/api/me/listing").json()["listing"]["availableTo"] == OFFER["availableTo"]
         fresh = {**data, "clientRequestId": str(uuid4())}
     def create(_):
@@ -80,10 +83,12 @@ def test_scenario_and_concurrency(database):
     with ThreadPoolExecutor(2) as pool:
         assert sorted(pool.map(decide, ["accepted", "declined"])) == [200, 409]
     with TestClient(create_app(settings)) as c:
+        c.app.state.max_transport = httpx.MockTransport(
+            lambda request: httpx.Response(200, json={"message": {"body": {"mid": "test-mid"}}}))
         c.cookies.update(hc)
         c.put("/api/me/listing", headers=ORIGIN, json={**OFFER, "availableFrom": "2031-01-01", "availableTo": "2031-01-10"})
         c.cookies.clear(); c.cookies.update(gc)
         assert c.post("/api/requests", headers=ORIGIN, json=data).json()["id"] == rid
-        assert c.get(f"/api/requests/{rid}/contact").json()["maxUserId"] == str(identities[0])
+        assert c.post(f"/api/requests/{rid}/contact", headers=ORIGIN).json()["maxUserId"] == str(identities[0])
         c.cookies.clear()
-        assert c.get(f"/api/requests/{rid}/contact").status_code == 401
+        assert c.post(f"/api/requests/{rid}/contact", headers=ORIGIN).status_code == 401

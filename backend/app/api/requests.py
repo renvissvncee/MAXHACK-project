@@ -1,6 +1,6 @@
 from typing import Literal
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from app.api.dependencies import CurrentUser, check_origin
 from app.db import DbSession
 from app.schemas.profile import ErrorResponse
@@ -8,7 +8,7 @@ from app.schemas.requests import RequestInput, RequestDecision, RequestResponse,
 from app.services import requests as service
 
 router = APIRouter(prefix="/api/requests", tags=["requests"], responses={
-    status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 503)
+    status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 502, 503)
 })
 
 
@@ -33,6 +33,7 @@ async def decide(request_id: UUID, data: RequestDecision, user: CurrentUser, db:
     return await service.decide_request(db, user, request_id, data.status)
 
 
-@router.get("/{request_id}/contact", response_model=ContactResponse)
-async def contact(request_id: UUID, user: CurrentUser, db: DbSession):
-    return await service.get_contact(db, user, request_id)
+@router.post("/{request_id}/contact", response_model=ContactResponse, dependencies=[Depends(check_origin)])
+async def contact(request_id: UUID, user: CurrentUser, db: DbSession, request: Request):
+    return await service.get_contact(db, user, request_id, request.app.state.settings,
+                                     getattr(request.app.state, "max_transport", None))

@@ -165,11 +165,17 @@ export default function Requests() {
               {contact && (
                 <>
                   <div className={styles.contact}>
-                    <span>Контакт MAX</span>
-                    <strong>{contact.username ? `@${contact.username}` : `ID ${contact.maxUserId}`}</strong>
+                    <UserRoundCheck size={16} />
+                    <span>Бот отправил вам контакт {person.name} в MAX — проверьте сообщения от бота.</span>
                   </div>
-                  <Button variant="outline" fullWidth icon={<MessageSquareText size={17} />}
-                    onClick={() => setReviewSubject(person)}>Оставить или изменить отзыв</Button>
+                  <div className={styles.matchActions}>
+                    <Button variant="secondary" icon={<UserRoundCheck size={17} />}
+                      loading={busyId === request.id} onClick={() => void revealContact(request)}>
+                      Отправить ещё раз
+                    </Button>
+                    <Button variant="outline" icon={<MessageSquareText size={17} />}
+                      onClick={() => setReviewSubject(person)}>Отзыв</Button>
+                  </div>
                 </>
               )}
             </article>

@@ -23,5 +23,5 @@ export function decideStayRequest(id: string, status: Extract<RequestStatus, "ac
 }
 
 export function getMatchContact(id: string) {
-  return api<MatchContact>(`/api/requests/${encodeURIComponent(id)}/contact`);
+  return api<MatchContact>(`/api/requests/${encodeURIComponent(id)}/contact`, { method: "POST" });
 }

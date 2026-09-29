@@ -658,6 +658,12 @@
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Unprocessable Content"
+        "502":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Bad Gateway"
         "503":
           "content":
             "application/json":
@@ -739,6 +745,12 @@
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Unprocessable Content"
+        "502":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Bad Gateway"
         "503":
           "content":
             "application/json":
@@ -797,6 +809,12 @@
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Unprocessable Content"
+        "502":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Bad Gateway"
         "503":
           "content":
             "application/json":
@@ -860,6 +878,12 @@
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Unprocessable Content"
+        "502":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Bad Gateway"
         "503":
           "content":
             "application/json":
@@ -867,11 +891,11 @@
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Service Unavailable"
   "/api/requests/{request_id}/contact":
-    "get":
+    "post":
       "tags":
         - "requests"
       "summary": "Contact"
-      "operationId": "contact_api_requests__request_id__contact_get"
+      "operationId": "contact_api_requests__request_id__contact_post"
       "parameters":
         -
           "name": "request_id"
@@ -918,6 +942,12 @@
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
           "description": "Unprocessable Content"
+        "502":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Bad Gateway"
         "503":
           "content":
             "application/json":

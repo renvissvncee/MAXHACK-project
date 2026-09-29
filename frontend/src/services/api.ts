@@ -2,11 +2,19 @@ export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) { super(message); this.status = status; }
 }
+
+let sessionToken: string | null = null;
+
+export function setSessionToken(token: string | null) {
+  sessionToken = token;
+}
+
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   let response: Response;
   try {
     response = await fetch(path, { ...options, credentials: "include",
-      headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers },
+      headers: { ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}), ...options.headers },
       signal: AbortSignal.timeout(15000) });
   } catch { throw new Error("Сервер недоступен или не ответил за 15 секунд. Повторите запрос."); }
   if (!response.ok) {

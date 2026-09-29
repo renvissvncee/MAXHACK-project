@@ -13,8 +13,18 @@ async def check_origin(request: Request):
         raise AppError("origin_not_allowed", "Недопустимый источник запроса.", 403)
 
 
+def request_session_token(request: Request) -> str | None:
+    authorization = request.headers.get("authorization")
+    if authorization:
+        scheme, separator, token = authorization.partition(" ")
+        if separator and scheme.casefold() == "bearer" and token and " " not in token:
+            return token
+        raise AppError("unauthorized", "Войдите через MAX.", 401)
+    return request.cookies.get(COOKIE_NAME)
+
+
 async def current_user(request: Request, db: DbSession) -> User:
-    return await authenticate(db, request.cookies.get(COOKIE_NAME))
+    return await authenticate(db, request_session_token(request))
 
 
 CurrentUser = Annotated[User, Depends(current_user)]

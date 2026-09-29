@@ -130,6 +130,28 @@ def test_login_profile_isolation_logout_and_expiration(database):
         assert response.json()['city'] == 'Казань'
 
 
+def test_bearer_session_works_when_embedded_browser_blocks_cookies(database):
+    settings = Settings(database_url=database, max_bot_token=TEST_TOKEN, cookie_secure=True,
+                        allowed_origins=['https://mini.example'], _env_file=None)
+    origin = {'Origin': 'https://mini.example'}
+    identity = uuid4().int % (2**60)
+    with TestClient(create_app(settings)) as client:
+        login = client.post('/api/auth/max', headers=origin,
+                            json={'initData': make_signed_data(user_id=identity)})
+        assert login.status_code == 200
+        token = login.json()['sessionToken']
+        assert token and f'priut_session={token}' in login.headers['set-cookie']
+        client.cookies.clear()
+        bearer = {**origin, 'Authorization': f'Bearer {token}'}
+        assert client.get('/api/me', headers=bearer).status_code == 200
+        saved = client.patch('/api/me', headers=bearer,
+                             json={'name': 'Новый гость', 'city': 'Казань', 'interests': ['Музыка']})
+        assert saved.status_code == 200
+        assert saved.json()['profileCompleted'] is True
+        assert client.post('/api/auth/logout', headers=bearer).status_code == 204
+        assert client.get('/api/me', headers=bearer).status_code == 401
+
+
 def test_database_connection_failure_is_safe(database):
     # Port 1 is not the test DB. No database mutation is performed here.
     settings = Settings(database_url='postgresql+asyncpg://unused:private-value@127.0.0.1:1/unused',

@@ -59,7 +59,7 @@
           "content":
             "application/json":
               "schema":
-                "$ref": "#/components/schemas/ProfileResponse"
+                "$ref": "#/components/schemas/LoginResponse"
         "401":
           "description": "Unauthorized"
           "content":
@@ -1458,6 +1458,66 @@
       "required":
         - "initData"
       "title": "LoginRequest"
+    "LoginResponse":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "name":
+          "type": "string"
+          "title": "Name"
+        "city":
+          "type": "string"
+          "title": "City"
+        "bio":
+          "type": "string"
+          "title": "Bio"
+        "interests":
+          "items":
+            "type": "string"
+          "type": "array"
+          "title": "Interests"
+        "avatarEmoji":
+          "type": "string"
+          "title": "Avataremoji"
+        "avatarColor":
+          "type": "string"
+          "title": "Avatarcolor"
+        "photoUrl":
+          "anyOf":
+            -
+              "type": "string"
+            -
+              "type": "null"
+          "title": "Photourl"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+          "title": "Createdat"
+        "profileCompleted":
+          "type": "boolean"
+          "title": "Profilecompleted"
+        "sessionToken":
+          "type": "string"
+          "maxLength": 128
+          "minLength": 32
+          "title": "Sessiontoken"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "name"
+        - "city"
+        - "bio"
+        - "interests"
+        - "avatarEmoji"
+        - "avatarColor"
+        - "photoUrl"
+        - "createdAt"
+        - "profileCompleted"
+        - "sessionToken"
+      "title": "LoginResponse"
     "MyListingResponse":
       "properties":
         "listing":

@@ -23,6 +23,8 @@ if (!response.ok) throw new Error(body.error.message);
 
 Backend выставляет HttpOnly cookie `priut_session`, path `/api`. На HTTPS используются `SameSite=None; Secure; Partitioned` для iframe MAX Web и браузеров, блокирующих обычные third-party cookies; в локальном HTTP — `SameSite=Lax` и `COOKIE_SECURE=false`. JS не читает токен. Сессия по умолчанию действует 24 часа; данные запуска MAX принимаются в течение часа. Это идентификация аккаунта MAX, не государственная верификация личности.
 
+Некоторые embedded-браузеры блокируют даже partitioned cookie. Поэтому ответ `POST /api/auth/max` также содержит `sessionToken`. Production frontend хранит его только в памяти текущей страницы и передаёт как `Authorization: Bearer <sessionToken>`. Токен не пишется в `localStorage`, URL или логи. После перезагрузки страницы вход повторяется по подписанному `initData` MAX. Backend принимает cookie или Bearer session; при наличии Bearer он имеет приоритет.
+
 ## Общий ответ профиля
 
 ```json

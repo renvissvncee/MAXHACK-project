@@ -59,6 +59,14 @@ class ProfileResponse(Contract):
         )
 
 
+class LoginResponse(ProfileResponse):
+    session_token: str = Field(min_length=32, max_length=128)
+
+    @classmethod
+    def from_login(cls, user, token: str):
+        return cls(**ProfileResponse.from_user(user).model_dump(), session_token=token)
+
+
 class ErrorDetail(BaseModel):
     code: str
     message: str

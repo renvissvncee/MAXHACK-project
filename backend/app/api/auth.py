@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Request, Response
 
-from app.api.dependencies import check_origin
+from app.api.dependencies import check_origin, request_session_token
 from app.db import DbSession
 from app.errors import AppError
 from app.max_bot.validation import validate_init_data
-from app.schemas.profile import ErrorResponse, LoginRequest, ProfileResponse
+from app.schemas.profile import ErrorResponse, LoginRequest, LoginResponse
 from app.services import auth
 
 router = APIRouter(prefix="/api/auth", tags=["auth"], dependencies=[Depends(check_origin)],
@@ -42,20 +42,20 @@ def delete_session_cookie(response: Response, secure: bool) -> None:
             response.raw_headers[-1] = (name, value + b"; Partitioned")
 
 
-@router.post("/max", response_model=ProfileResponse)
+@router.post("/max", response_model=LoginResponse)
 async def login(body: LoginRequest, request: Request, response: Response, db: DbSession):
     settings = request.app.state.settings
     if not settings.max_bot_token or not settings.max_bot_token.get_secret_value():
         raise AppError("auth_not_configured", "Вход через MAX пока не настроен.", 503)
     identity = validate_init_data(body.initData, settings.max_bot_token.get_secret_value(), settings.init_data_max_age_seconds)
-    user, token = await auth.login(db, identity, settings.session_ttl_seconds, request.cookies.get(auth.COOKIE_NAME))
+    user, token = await auth.login(db, identity, settings.session_ttl_seconds, request_session_token(request))
     set_session_cookie(response, token, settings.session_ttl_seconds, settings.cookie_secure)
-    return ProfileResponse.from_user(user)
+    return LoginResponse.from_login(user, token)
 
 
 @router.post("/logout", status_code=204)
 async def logout(request: Request, db: DbSession):
-    await auth.logout(db, request.cookies.get(auth.COOKIE_NAME))
+    await auth.logout(db, request_session_token(request))
     response = Response(status_code=204)
     delete_session_cookie(response, request.app.state.settings.cookie_secure)
     return response

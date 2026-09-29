@@ -52,7 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_middleware(CORSMiddleware, allow_origins=configuration.allowed_origins,
                        allow_credentials=True, allow_methods=["GET", "POST", "PATCH", "PUT"],
-                       allow_headers=["Content-Type"])
+                       allow_headers=["Content-Type", "Authorization"])
     app.add_exception_handler(AppError, app_error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
     app.add_exception_handler(SQLAlchemyError, database_error_handler)

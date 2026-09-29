@@ -1,8 +1,8 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { api, ApiError } from '../src/services/api.ts';
+import { api, ApiError, setSessionToken } from '../src/services/api.ts';
 const original = globalThis.fetch;
-afterEach(() => { globalThis.fetch = original; });
+afterEach(() => { globalThis.fetch = original; setSessionToken(null); });
 test('sends session cookies and JSON and decodes the response', async () => {
   globalThis.fetch = async (url, options) => {
     assert.equal(url, '/api/me'); assert.equal(options.credentials, 'include');
@@ -11,6 +11,14 @@ test('sends session cookies and JSON and decodes the response', async () => {
     return Response.json({ city: 'Казань' });
   };
   assert.deepEqual(await api('/api/me', { method: 'PATCH', body: JSON.stringify({ city: 'Казань' }) }), { city: 'Казань' });
+});
+test('uses an in-memory bearer session when embedded cookies are blocked', async () => {
+  setSessionToken('browser-independent-session');
+  globalThis.fetch = async (_url, options) => {
+    assert.equal(options.headers.Authorization, 'Bearer browser-independent-session');
+    return Response.json({ ok: true });
+  };
+  assert.deepEqual(await api('/api/me'), { ok: true });
 });
 test('logout accepts empty 204', async () => {
   globalThis.fetch = async () => new Response(null, { status: 204 });

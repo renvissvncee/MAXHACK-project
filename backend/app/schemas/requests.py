@@ -16,6 +16,8 @@ class RequestInput(Contract):
 
     @model_validator(mode="after")
     def valid_dates(self):
+        if self.date_from < date.today():
+            raise ValueError("dateFrom must be today or later")
         if self.date_to < self.date_from:
             raise ValueError("dateTo must be on or after dateFrom")
         return self

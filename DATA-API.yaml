@@ -388,6 +388,18 @@
             "default": 1
             "title": "Guests"
         -
+          "name": "accommodation_type"
+          "in": "query"
+          "required": false
+          "schema":
+            "anyOf":
+              -
+                "type": "string"
+                "pattern": "^(room|apartment|house|sofa)$"
+              -
+                "type": "null"
+            "title": "Accommodation Type"
+        -
           "name": "limit"
           "in": "query"
           "required": false

@@ -42,6 +42,7 @@ async def list_listings(
     date_from: date | None = None,
     date_to: date | None = None,
     guests: int = Query(default=1, ge=1, le=8),
+    accommodation_type: str | None = Query(default=None, pattern=r"^(room|apartment|house|sofa)$"),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
@@ -50,7 +51,7 @@ async def list_listings(
     if date_from and date_to and date_to < date_from:
         raise AppError("invalid_date_range", "Дата окончания должна быть не раньше даты начала.", 422)
     return await search_listings(db, user, city.strip() if city and city.strip() else None, date_from, date_to,
-                                 guests, limit, offset)
+                                 guests, accommodation_type, limit, offset)
 
 
 @router.get("/listings/{listing_id}", response_model=ListingResponse,

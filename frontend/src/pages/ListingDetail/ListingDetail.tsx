@@ -27,6 +27,9 @@ import styles from "./ListingDetail.module.css";
 
 type Status = "loading" | "success" | "error";
 
+const today = () => new Date().toISOString().slice(0, 10);
+const laterOf = (a: string, b: string) => (a > b ? a : b);
+
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -70,7 +73,7 @@ export default function ListingDetail() {
   };
 
   const handleRequest = async () => {
-    if (!listing || !dateFrom || !dateTo || dateTo < dateFrom
+    if (!listing || !dateFrom || !dateTo || dateTo < dateFrom || dateFrom < today()
       || dateFrom < listing.availableFrom || dateTo > listing.availableTo) {
       showToast("Проверьте даты поездки.", "info");
       return;
@@ -99,7 +102,7 @@ export default function ListingDetail() {
 
   const openRequest = () => {
     if (!listing) return;
-    setDateFrom(listing.availableFrom);
+    setDateFrom(laterOf(today(), listing.availableFrom));
     setDateTo(listing.availableTo);
     setGuests(1);
     setMessage("");
@@ -314,12 +317,12 @@ export default function ListingDetail() {
               <div className={styles.requestDates}>
                 <label>
                   <span>Заезд</span>
-                  <input type="date" min={listing.availableFrom} max={listing.availableTo} value={dateFrom}
+                  <input type="date" min={laterOf(today(), listing.availableFrom)} max={listing.availableTo} value={dateFrom}
                     onChange={(event) => setDateFrom(event.target.value)} />
                 </label>
                 <label>
                   <span>Выезд</span>
-                  <input type="date" min={dateFrom || listing.availableFrom} max={listing.availableTo} value={dateTo}
+                  <input type="date" min={dateFrom || laterOf(today(), listing.availableFrom)} max={listing.availableTo} value={dateTo}
                     onChange={(event) => setDateTo(event.target.value)} />
                 </label>
               </div>

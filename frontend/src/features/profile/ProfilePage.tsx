@@ -1,4 +1,4 @@
-import { LogOut, Moon, PenSquare, Sun } from "lucide-react";
+import { Moon, PenSquare, Sun } from "lucide-react";
 import { useState } from "react";
 
 import Avatar from "../../components/Avatar/Avatar";
@@ -16,7 +16,7 @@ import styles from "./ProfilePage.module.css";
 
 export default function ProfilePage() {
 
-  const { user, updateProfile, logout, isSaving } = useUser();
+  const { user, updateProfile, isSaving } = useUser();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
 
@@ -35,10 +35,6 @@ export default function ProfilePage() {
     if (!draft) return;
     try { await updateProfile(draft); setEditOpen(false); showToast("Профиль обновлён"); }
     catch (error) { showToast(error instanceof Error ? error.message : "Ошибка сохранения"); }
-  };
-
-  const handleLogout = async () => {
-    try { await logout(); } catch (error) { showToast(error instanceof Error ? error.message : "Ошибка выхода"); }
   };
 
   return (
@@ -76,17 +72,6 @@ export default function ProfilePage() {
               Тёмная тема
             </span>
             <span className={styles.switch} data-on={theme === "dark" || undefined} />
-          </button>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.settingsList}>
-          <button type="button" className={`${styles.settingRow} ${styles.danger}`} onClick={handleLogout}>
-            <span className={styles.settingLabel}>
-              <LogOut size={18} />
-              Выйти
-            </span>
           </button>
         </div>
       </section>

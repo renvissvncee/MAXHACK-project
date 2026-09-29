@@ -34,6 +34,8 @@ class ListingInput(Contract):
 
     @model_validator(mode="after")
     def valid_dates_and_dedupe(self):
+        if self.available_from < date.today():
+            raise ValueError("availableFrom must be today or later")
         if self.available_to < self.available_from:
             raise ValueError("availableTo must be on or after availableFrom")
         for field in ("tags", "amenities", "rules"):

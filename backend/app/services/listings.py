@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import uuid4
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import case, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.services.reviews import reputation_map
@@ -39,18 +39,33 @@ async def delete_my_listing(db, owner: User) -> None:
 
 
 async def search_listings(db, viewer: User, city: str | None, date_from: date | None,
-                          date_to: date | None, guests: int, limit: int, offset: int):
+                          date_to: date | None, guests: int, accommodation_type: str | None,
+                          limit: int, offset: int):
     statement = select(Listing, User).join(User, User.id == Listing.owner_id).where(
         Listing.owner_id != viewer.id,
         Listing.guests >= guests,
     )
     if city:
         statement = statement.where(func.lower(Listing.city) == city.casefold())
+    if accommodation_type:
+        statement = statement.where(Listing.accommodation_type == accommodation_type)
     if date_from:
         statement = statement.where(Listing.available_from <= date_from)
     if date_to:
         statement = statement.where(Listing.available_to >= date_to)
-    statement = statement.order_by(Listing.created_at.desc(), Listing.id).limit(limit).offset(offset)
+    if city:
+        # An explicit city search is already as relevant as it gets — newest first.
+        statement = statement.order_by(Listing.created_at.desc(), Listing.id)
+    else:
+        # Nothing to rank by but "how relevant is this to the viewer" — a
+        # listing in the viewer's own city is the closest proxy for
+        # relevance we have without real geolocation, so surface those
+        # first and fall back to recency within each group.
+        statement = statement.order_by(
+            case((func.lower(Listing.city) == (viewer.city or "").casefold(), 0), else_=1),
+            Listing.created_at.desc(), Listing.id,
+        )
+    statement = statement.limit(limit).offset(offset)
     rows = (await db.execute(statement)).all()
     stats = await reputation_map(db, [owner.id for _, owner in rows])
     return [ListingResponse.from_listing(listing, owner).model_copy(update={"rating": stats.get(owner.id, (None, 0))[0], "reviews_count": stats.get(owner.id, (None, 0))[1]}) for listing, owner in rows]

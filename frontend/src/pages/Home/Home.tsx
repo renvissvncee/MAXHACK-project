@@ -17,7 +17,7 @@ import StateView from "../../components/StateView/StateView";
 import Tag from "../../components/Tag/Tag";
 import { quickCities } from "../../data/cities";
 import { useUser } from "../../context/UserContext";
-import { getListings, searchListings } from "../../services/listingsService";
+import { searchListings } from "../../services/listingsService";
 import type { SearchFormState } from "../../types/filters";
 import type { AccommodationType, Listing } from "../../types/listing";
 import styles from "./Home.module.css";
@@ -74,15 +74,16 @@ export default function Home() {
   const load = useCallback(async () => {
     setStatus("loading");
     try {
-      const data = hasActiveSearch
-        ? await searchListings({
-            city: urlFilters.city,
-            dateFrom: urlFilters.dateFrom || undefined,
-            dateTo: urlFilters.dateTo || undefined,
-            guests: urlFilters.guests > 1 ? urlFilters.guests : undefined,
-            accommodationType: urlFilters.accommodationType === "any" ? undefined : urlFilters.accommodationType,
-          })
-        : await getListings();
+      // Always go through the same filtered search, city or not — guests/
+      // accommodation type/dates from the filter sheet must apply to the
+      // "nearby" feed too, not only once a city has been typed in.
+      const data = await searchListings({
+        city: urlFilters.city || undefined,
+        dateFrom: urlFilters.dateFrom || undefined,
+        dateTo: urlFilters.dateTo || undefined,
+        guests: urlFilters.guests > 1 ? urlFilters.guests : undefined,
+        accommodationType: urlFilters.accommodationType === "any" ? undefined : urlFilters.accommodationType,
+      });
       setListings(data);
       setStatus(data.length > 0 ? "success" : "empty");
     } catch (caught) {
@@ -96,6 +97,19 @@ export default function Home() {
     void load();
   }, [load]);
 
+  // Live search: typing (or clearing) the city re-runs the search on its
+  // own, without waiting for the Enter/"Найти" submit. Debounced so it
+  // doesn't fire a request per keystroke, and skipped once the input
+  // already matches the URL (e.g. right after the sync effect above, or
+  // after a quick-city tap that updated the URL directly).
+  useEffect(() => {
+    const trimmed = cityInput.trim();
+    if (trimmed === activeCity) return;
+    const timer = window.setTimeout(() => runSearch(trimmed), 350);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityInput]);
+
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 320);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -108,11 +122,14 @@ export default function Home() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const city = cityInput.trim();
-    if (city) runSearch(city);
+    runSearch(cityInput.trim());
   };
 
   const activeFilterCount = (filters.guests > 1 ? 1 : 0) + (filters.accommodationType !== "any" ? 1 : 0);
+  // Whether ANY filter narrows the feed — not just a typed city. Guests/type/
+  // dates from the sheet apply to the "nearby" list too, so "no results"
+  // messaging and the count need to react to those as well.
+  const hasActiveFilters = hasActiveSearch || activeFilterCount > 0 || Boolean(filters.dateFrom) || Boolean(filters.dateTo);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -165,7 +182,7 @@ export default function Home() {
           <h2 className={styles.sectionTitle}>
             {hasActiveSearch ? `Варианты · ${activeCity}` : "Варианты рядом"}
           </h2>
-          {hasActiveSearch && (
+          {hasActiveFilters && (
             <p className={styles.resultsStatus}>
               {status === "loading" && "Ищем варианты…"}
               {status === "success" && `Найдено: ${listings.length}`}
@@ -192,16 +209,16 @@ export default function Home() {
             onAction={load}
           />
         )}
-        {status === "empty" && hasActiveSearch && (
+        {status === "empty" && hasActiveFilters && (
           <StateView
             icon={<MapPinOff size={26} strokeWidth={1.6} />}
-            title="В этом городе пока нет подходящих вариантов"
+            title={hasActiveSearch ? "В этом городе пока нет подходящих вариантов" : "Под такие фильтры пока ничего не нашлось"}
             description="Попробуйте выбрать другой город или ослабить фильтры поиска."
             actionLabel="Изменить фильтры"
             onAction={() => setFilterSheetOpen(true)}
           />
         )}
-        {status === "empty" && !hasActiveSearch && (
+        {status === "empty" && !hasActiveFilters && (
           <StateView
             icon={<HomeIcon size={26} strokeWidth={1.6} />}
             title="Пока нет предложений"
@@ -224,7 +241,7 @@ export default function Home() {
         onClose={() => setFilterSheetOpen(false)}
         onApply={() => {
           const city = cityInput.trim() || activeCity;
-          if (city) runSearch(city, filters);
+          runSearch(city, filters);
         }}
       />
 

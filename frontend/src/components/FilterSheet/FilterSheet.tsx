@@ -15,6 +15,7 @@ interface FilterSheetProps {
 }
 
 const accommodationOptions: Array<AccommodationType | "any"> = ["any", "room", "apartment", "house", "sofa"];
+const today = () => new Date().toISOString().slice(0, 10);
 
 export default function FilterSheet({ open, value, onChange, onClose, onApply }: FilterSheetProps) {
   return (
@@ -27,7 +28,11 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
           variant="primary"
           size="lg"
           fullWidth
-          disabled={Boolean(value.dateFrom) !== Boolean(value.dateTo) || Boolean(value.dateFrom && value.dateTo < value.dateFrom)}
+          disabled={
+            Boolean(value.dateFrom) !== Boolean(value.dateTo)
+            || Boolean(value.dateFrom && value.dateTo < value.dateFrom)
+            || Boolean(value.dateFrom && value.dateFrom < today())
+          }
           onClick={() => {
             onApply();
             onClose();
@@ -82,6 +87,7 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
             <span>Заезд</span>
             <input
               type="date"
+              min={today()}
               value={value.dateFrom}
               onChange={(event) => onChange({ ...value, dateFrom: event.target.value })}
             />
@@ -90,12 +96,18 @@ export default function FilterSheet({ open, value, onChange, onClose, onApply }:
             <span>Выезд</span>
             <input
               type="date"
-              min={value.dateFrom}
+              min={value.dateFrom || today()}
               value={value.dateTo}
               onChange={(event) => onChange({ ...value, dateTo: event.target.value })}
             />
           </label>
         </div>
+        {value.dateFrom && value.dateFrom < today() && (
+          <p className={styles.error}>Дата «заезд» не может быть в прошлом.</p>
+        )}
+        {value.dateFrom && value.dateTo && value.dateTo < value.dateFrom && (
+          <p className={styles.error}>Дата «выезд» не может быть раньше даты «заезд».</p>
+        )}
         <p className={styles.datesHint}>Укажите обе даты или оставьте обе пустыми.</p>
       </div>
     </BottomSheet>

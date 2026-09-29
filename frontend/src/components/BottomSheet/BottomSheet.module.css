@@ -29,6 +29,7 @@
   flex-direction: column;
   box-shadow: var(--shadow-lg);
   animation: slideUp 0.22s cubic-bezier(0.25, 0.8, 0.4, 1);
+  overflow-x: hidden;
 }
 
 @keyframes slideUp {
@@ -76,6 +77,7 @@
 
 .content {
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
 }
 

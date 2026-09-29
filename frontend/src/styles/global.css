@@ -11,6 +11,16 @@ body {
   margin: 0;
 }
 
+html {
+  /* Some WebViews (notably the MAX mobile app's, unlike its web/desktop
+     client) auto-inflate text on narrow viewports for readability, but
+     leave fixed-size SVG icons alone — the mismatch is exactly "icons look
+     tiny, labels look normal" reported only on mobile MAX, not web. Locking
+     this to 100% makes text render at the size we actually specify. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);

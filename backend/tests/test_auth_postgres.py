@@ -6,13 +6,14 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi import Response
 from fastapi.testclient import TestClient
 from sqlalchemy import select, update
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.config import Settings
-from app.api.auth import session_cookie_samesite
+from app.api.auth import delete_session_cookie, session_cookie_samesite, set_session_cookie
 from app.main import create_app
 from app.models import Session, User
 from app.services.auth import hash_token
@@ -23,6 +24,25 @@ from uuid import uuid4
 def test_session_cookie_policy_supports_max_web_iframe():
     assert session_cookie_samesite(secure=True) == "none"
     assert session_cookie_samesite(secure=False) == "lax"
+
+    secure = Response()
+    set_session_cookie(secure, "test-token", 60, True)
+    header = secure.headers["set-cookie"]
+    assert "HttpOnly" in header
+    assert "Path=/api" in header
+    assert "SameSite=none" in header
+    assert "Secure" in header
+    assert "Partitioned" in header
+
+    local = Response()
+    set_session_cookie(local, "test-token", 60, False)
+    assert "SameSite=lax" in local.headers["set-cookie"]
+    assert "Partitioned" not in local.headers["set-cookie"]
+
+    deleted = Response()
+    delete_session_cookie(deleted, True)
+    assert "Partitioned" in deleted.headers["set-cookie"]
+    assert "Max-Age=0" in deleted.headers["set-cookie"]
 
 
 @pytest.fixture

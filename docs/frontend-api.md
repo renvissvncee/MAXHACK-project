@@ -21,7 +21,7 @@ const body = await response.json();
 if (!response.ok) throw new Error(body.error.message);
 ```
 
-Backend выставляет HttpOnly cookie `priut_session`, path `/api`. На HTTPS используются `SameSite=None; Secure` для iframe MAX Web; в локальном HTTP — `SameSite=Lax` и `COOKIE_SECURE=false`. JS не читает токен. Сессия по умолчанию действует 24 часа; данные запуска MAX принимаются в течение часа. Это идентификация аккаунта MAX, не государственная верификация личности.
+Backend выставляет HttpOnly cookie `priut_session`, path `/api`. На HTTPS используются `SameSite=None; Secure; Partitioned` для iframe MAX Web и браузеров, блокирующих обычные third-party cookies; в локальном HTTP — `SameSite=Lax` и `COOKIE_SECURE=false`. JS не читает токен. Сессия по умолчанию действует 24 часа; данные запуска MAX принимаются в течение часа. Это идентификация аккаунта MAX, не государственная верификация личности.
 
 ## Общий ответ профиля
 

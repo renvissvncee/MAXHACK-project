@@ -20,6 +20,28 @@ def session_cookie_samesite(secure: bool) -> str:
     return "none" if secure else "lax"
 
 
+def set_session_cookie(response: Response, token: str, lifetime: int, secure: bool) -> None:
+    response.set_cookie(auth.COOKIE_NAME, token, max_age=lifetime,
+                        httponly=True, secure=secure,
+                        samesite=session_cookie_samesite(secure), path="/api")
+    if secure:
+        # Python 3.13's stdlib cannot serialize CHIPS yet, although browsers can.
+        # Add the flag to Starlette's already validated Set-Cookie header. This
+        # lets MAX Web keep our HttpOnly session in a partition of its iframe.
+        name, value = response.raw_headers[-1]
+        if name.lower() == b"set-cookie":
+            response.raw_headers[-1] = (name, value + b"; Partitioned")
+
+
+def delete_session_cookie(response: Response, secure: bool) -> None:
+    response.delete_cookie(auth.COOKIE_NAME, path="/api", httponly=True,
+                           secure=secure, samesite=session_cookie_samesite(secure))
+    if secure:
+        name, value = response.raw_headers[-1]
+        if name.lower() == b"set-cookie":
+            response.raw_headers[-1] = (name, value + b"; Partitioned")
+
+
 @router.post("/max", response_model=ProfileResponse)
 async def login(body: LoginRequest, request: Request, response: Response, db: DbSession):
     settings = request.app.state.settings
@@ -27,9 +49,7 @@ async def login(body: LoginRequest, request: Request, response: Response, db: Db
         raise AppError("auth_not_configured", "Вход через MAX пока не настроен.", 503)
     identity = validate_init_data(body.initData, settings.max_bot_token.get_secret_value(), settings.init_data_max_age_seconds)
     user, token = await auth.login(db, identity, settings.session_ttl_seconds, request.cookies.get(auth.COOKIE_NAME))
-    response.set_cookie(auth.COOKIE_NAME, token, max_age=settings.session_ttl_seconds,
-                        httponly=True, secure=settings.cookie_secure,
-                        samesite=session_cookie_samesite(settings.cookie_secure), path="/api")
+    set_session_cookie(response, token, settings.session_ttl_seconds, settings.cookie_secure)
     return ProfileResponse.from_user(user)
 
 
@@ -37,7 +57,5 @@ async def login(body: LoginRequest, request: Request, response: Response, db: Db
 async def logout(request: Request, db: DbSession):
     await auth.logout(db, request.cookies.get(auth.COOKIE_NAME))
     response = Response(status_code=204)
-    response.delete_cookie(auth.COOKIE_NAME, path="/api", httponly=True,
-                           secure=request.app.state.settings.cookie_secure,
-                           samesite=session_cookie_samesite(request.app.state.settings.cookie_secure))
+    delete_session_cookie(response, request.app.state.settings.cookie_secure)
     return response

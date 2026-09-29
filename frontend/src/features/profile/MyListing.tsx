@@ -15,7 +15,7 @@ import styles from "./MyListing.module.css";
 const GUEST_FORMS = ["гость", "гостя", "гостей"] as const;
 
 const emptyDraft: ListingInput = {
-  city: "",
+  locality: null,
   title: "",
   shortDescription: "",
   description: "",
@@ -30,9 +30,9 @@ const emptyDraft: ListingInput = {
 };
 
 function toInput(listing: Listing): ListingInput {
-  const { city, title, shortDescription, description, guests, accommodationType,
+  const { locality, title, shortDescription, description, guests, accommodationType,
     availableFrom, availableTo, tags, amenities, rules } = listing;
-  return { city, title, shortDescription, description, guests, accommodationType,
+  return { locality, title, shortDescription, description, guests, accommodationType,
     availableFrom, availableTo, tags, amenities, rules, photoUrl: listing.photos[0] ?? null };
 }
 
@@ -64,7 +64,7 @@ export default function MyListing() {
   }, [load]);
 
   const isValid =
-    draft.city.trim().length > 0 &&
+    draft.locality !== null &&
     draft.title.trim().length > 0 &&
     draft.shortDescription.trim().length > 0 &&
     draft.description.trim().length > 0 &&

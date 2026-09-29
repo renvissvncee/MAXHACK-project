@@ -20,7 +20,10 @@ def test_demo_dataset_is_distinct_consistent_and_visibly_labelled():
         assert row["owner"] in user_slugs
         assert row["available_from"] <= row["available_to"]
         assert 1 <= row["guests"] <= 8
-        ListingInput(**{key: value for key, value in row.items() if key not in {"slug", "owner"}})
+        ListingInput(
+            locality_id=demo_id("locality", row["city"]),
+            **{key: value for key, value in row.items() if key not in {"slug", "owner", "city"}},
+        )
 
     statuses = {row["status"] for row in REQUESTS}
     assert statuses == {"pending", "accepted", "declined"}

@@ -1,10 +1,11 @@
 import { api, ApiError, setSessionToken } from "../services/api";
 import type { UserProfile, UserProfileDraft } from "../types/user";
 import type { UserRepository } from "./UserRepository";
-interface ProfileResponse { id: string; name: string; city: string; bio: string; interests: string[]; photoUrl: string | null; profileCompleted: boolean; }
+import type { Locality } from "../types/locality";
+interface ProfileResponse { id: string; name: string; city: string; locality: Locality | null; bio: string; interests: string[]; photoUrl: string | null; profileCompleted: boolean; }
 interface LoginResponse extends ProfileResponse { sessionToken: string; }
 function profile(data: ProfileResponse): UserProfile {
-  return { id: data.id, name: data.name, city: data.city, bio: data.bio, interests: data.interests,
+  return { id: data.id, name: data.name, city: data.city, locality: data.locality, bio: data.bio, interests: data.interests,
     photo: data.photoUrl, onboardingCompleted: data.profileCompleted };
 }
 let pending: Promise<UserProfile> | undefined;
@@ -24,8 +25,9 @@ export class ApiUserRepository implements UserRepository {
     return pending;
   }
   async updateProfile(patch: Partial<UserProfileDraft>): Promise<UserProfile> {
-    const { photo: _photo, ...editable } = patch;
-    return profile(await api<ProfileResponse>("/api/me", { method: "PATCH", body: JSON.stringify(editable) }));
+    const { photo: _photo, locality, ...editable } = patch;
+    const payload = { ...editable, ...(Object.hasOwn(patch, "locality") ? { localityId: locality?.id } : {}) };
+    return profile(await api<ProfileResponse>("/api/me", { method: "PATCH", body: JSON.stringify(payload) }));
   }
   completeOnboarding(draft: UserProfileDraft) { return this.updateProfile(draft); }
   async uploadProfilePhoto(_file: File): Promise<string> { throw new Error("Загрузка фото пока недоступна. Используется фото MAX."); }

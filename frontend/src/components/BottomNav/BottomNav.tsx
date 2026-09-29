@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import { getNotifications } from "../../services/notificationsService";
 import styles from "./BottomNav.module.css";
 
-// Search lives on the Главная screen itself (city bar + inline results),
+// Search lives on the Главная screen itself (locality bar + inline results),
 // so it isn't a separate nav destination.
 const items = [
   { to: "/home", label: "Главная", icon: Home },

@@ -1,7 +1,6 @@
 import type { AccommodationType } from "./listing";
 
 export interface SearchFormState {
-  city: string;
   dateFrom: string;
   dateTo: string;
   guests: number;
@@ -9,7 +8,6 @@ export interface SearchFormState {
 }
 
 export const defaultSearchState: SearchFormState = {
-  city: "",
   dateFrom: "",
   dateTo: "",
   guests: 1,

@@ -12,6 +12,7 @@ from app.api.requests import router as requests_router
 from app.api.auth import router as auth_router
 from app.api.profiles import router as profiles_router
 from app.api.listings import router as listings_router
+from app.api.localities import router as localities_router
 from app.errors import AppError, app_error_handler, validation_error_handler, database_error_handler
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -67,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(router)
     app.include_router(auth_router)
     app.include_router(profiles_router)
+    app.include_router(localities_router)
     app.include_router(listings_router)
     app.include_router(requests_router)
     app.include_router(reviews_router)

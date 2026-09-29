@@ -41,7 +41,7 @@ def test_wrong_bot_cannot_validate_signature():
         validate_init_data(signed_data(), 'different-bot', 3600)
 
 
-@pytest.mark.parametrize('body', [{}, {'name': '  '}, {'city': None}, {'id': 'other'}, {'verified': True}, {'maxUserId': 1}])
+@pytest.mark.parametrize('body', [{}, {'name': '  '}, {'localityId': None}, {'id': 'other'}, {'verified': True}, {'maxUserId': 1}])
 def test_profile_rejects_invalid_and_server_owned_fields(body):
     with pytest.raises(ValidationError):
         ProfilePatch.model_validate(body)

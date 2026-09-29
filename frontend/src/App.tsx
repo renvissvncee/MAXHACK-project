@@ -15,7 +15,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import NotificationLaunch from "./pages/Notifications/NotificationLaunch";
 import Reviews from "./pages/Reviews/Reviews";
 
-// Search merged into Home (same screen, ?city=... controls the results
+// Search merged into Home (same screen, ?locality_id=... controls the results
 // section) — keep old /search links working rather than 404ing them.
 function RedirectSearchToHome() {
   const location = useLocation();

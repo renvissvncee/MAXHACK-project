@@ -9,6 +9,7 @@ from app.schemas.requests import RequestInput
 from tests.auth_helpers import TEST_TOKEN
 from tests.test_auth_postgres import database
 from tests.test_listings_postgres import login, OFFER, ORIGIN
+from tests.locality_helpers import locality_patch
 
 
 def test_validation():
@@ -25,13 +26,13 @@ def test_scenario_and_concurrency(database):
     identities = [uuid4().int % (2**60) for _ in range(3)]
     with TestClient(create_app(settings)) as c:
         host = login(c, identities[0]); hc = dict(c.cookies)
-        c.patch("/api/me", headers=ORIGIN, json={"city": "Москва", "interests": ["Кино"]})
+        c.patch("/api/me", headers=ORIGIN, json=locality_patch("Москва", interests=["Кино"]))
         offer = c.put("/api/me/listing", headers=ORIGIN, json=OFFER).json()
         data = dict(clientRequestId=str(uuid4()), listingId=offer["id"], dateFrom="2030-08-01", dateTo="2030-08-15", guests=2)
         assert c.post("/api/requests", headers=ORIGIN, json=data).status_code == 404
         c.cookies.clear(); guest = login(c, identities[1]); gc = dict(c.cookies)
         assert c.post("/api/requests", headers=ORIGIN, json=data).status_code == 409
-        c.patch("/api/me", headers=ORIGIN, json={"city": "Тула", "interests": ["Кино"]})
+        c.patch("/api/me", headers=ORIGIN, json=locality_patch("Тула", interests=["Кино"]))
         assert c.post("/api/requests", json=data).status_code == 403
         for patch in ({"guests": 3}, {"dateTo": "2030-08-16"}):
             assert c.post("/api/requests", headers=ORIGIN, json={**data, **patch}).json()["error"]["code"] == "trip_not_available"

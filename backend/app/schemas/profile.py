@@ -5,6 +5,8 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 from pydantic.alias_generators import to_camel
 
+from app.schemas.localities import LocalityResponse
+
 
 class Contract(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, extra="forbid", str_strip_whitespace=True)
@@ -21,7 +23,7 @@ Interest = Annotated[str, StringConstraints(min_length=1, max_length=50)]
 
 class ProfilePatch(Contract):
     name: Name | None = None
-    city: Name | None = None
+    locality_id: UUID | None = None
     bio: str | None = Field(default=None, max_length=2000)
     interests: list[Interest] | None = Field(default=None, max_length=20)
     avatar_emoji: str | None = Field(default=None, min_length=1, max_length=32)
@@ -40,6 +42,8 @@ class ProfileResponse(Contract):
     id: UUID
     name: str
     city: str
+    locality_id: UUID | None
+    locality: LocalityResponse | None
     bio: str
     interests: list[str]
     avatar_emoji: str
@@ -51,11 +55,14 @@ class ProfileResponse(Contract):
     @classmethod
     def from_user(cls, user):
         return cls(
-            id=user.id, name=user.name, city=user.city, bio=user.bio,
+            id=user.id, name=user.name, city=user.city,
+            locality_id=user.locality_id,
+            locality=LocalityResponse.from_locality(user.locality) if user.locality else None,
+            bio=user.bio,
             interests=user.interests, avatar_emoji=user.avatar_emoji,
             avatar_color=user.avatar_color, photo_url=user.photo_url,
             created_at=user.created_at,
-            profile_completed=bool(user.name and user.city and user.interests),
+            profile_completed=bool(user.name and user.locality_id and user.interests),
         )
 
 

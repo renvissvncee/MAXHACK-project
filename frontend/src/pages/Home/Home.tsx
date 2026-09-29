@@ -4,7 +4,6 @@ import {
   Home as HomeIcon,
   MapPinOff,
   SlidersHorizontal,
-  Search as SearchIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -15,18 +14,20 @@ import SkeletonCard from "../../components/SkeletonCard/SkeletonCard";
 import FilterSheet from "../../components/FilterSheet/FilterSheet";
 import StateView from "../../components/StateView/StateView";
 import Tag from "../../components/Tag/Tag";
+import LocalityCombobox from "../../components/LocalityCombobox/LocalityCombobox";
 import { quickCities } from "../../data/cities";
 import { useUser } from "../../context/UserContext";
 import { searchListings } from "../../services/listingsService";
+import { findCity, getLocality } from "../../services/localitiesService";
 import type { SearchFormState } from "../../types/filters";
 import type { AccommodationType, Listing } from "../../types/listing";
+import type { Locality } from "../../types/locality";
 import styles from "./Home.module.css";
 
 type ListingsStatus = "loading" | "success" | "empty" | "error";
 
 function readFiltersFromParams(params: URLSearchParams): SearchFormState {
   return {
-    city: params.get("city") ?? "",
     dateFrom: params.get("date_from") ?? "",
     dateTo: params.get("date_to") ?? "",
     guests: Number(params.get("guests") ?? 1) || 1,
@@ -34,9 +35,9 @@ function readFiltersFromParams(params: URLSearchParams): SearchFormState {
   };
 }
 
-function writeParams(target: SearchFormState): URLSearchParams {
+function writeParams(target: SearchFormState, locality: Locality | null): URLSearchParams {
   const params = new URLSearchParams();
-  if (target.city) params.set("city", target.city);
+  if (locality) params.set("locality_id", locality.id);
   if (target.dateFrom) params.set("date_from", target.dateFrom);
   if (target.dateTo) params.set("date_to", target.dateTo);
   if (target.guests > 1) params.set("guests", String(target.guests));
@@ -49,15 +50,15 @@ export default function Home() {
   const { user } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlFilters = readFiltersFromParams(searchParams);
-  const activeCity = urlFilters.city;
-  const hasActiveSearch = activeCity.length > 0;
+  const activeLocalityId = searchParams.get("locality_id") ?? "";
+  const hasActiveSearch = activeLocalityId.length > 0;
 
   const [listings, setListings] = useState<Listing[]>([]);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<ListingsStatus>("loading");
   const [filters, setFilters] = useState<SearchFormState>(urlFilters);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
-  const [cityInput, setCityInput] = useState(activeCity);
+  const [selectedLocality, setSelectedLocality] = useState<Locality | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // The URL is the source of truth for an active search (deep-linkable,
@@ -66,8 +67,12 @@ export default function Home() {
   // back/forward — the same class of staleness bug fixed earlier in
   // Requests.tsx's direction tab.
   useEffect(() => {
-    setCityInput(activeCity);
     setFilters(urlFilters);
+    if (!activeLocalityId) {
+      setSelectedLocality(null);
+    } else if (selectedLocality?.id !== activeLocalityId) {
+      getLocality(activeLocalityId).then(setSelectedLocality).catch(() => setSelectedLocality(null));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.toString()]);
 
@@ -76,9 +81,9 @@ export default function Home() {
     try {
       // Always go through the same filtered search, city or not — guests/
       // accommodation type/dates from the filter sheet must apply to the
-      // "nearby" feed too, not only once a city has been typed in.
+      // "nearby" feed too, not only once a locality has been selected.
       const data = await searchListings({
-        city: urlFilters.city || undefined,
+        localityId: activeLocalityId || undefined,
         dateFrom: urlFilters.dateFrom || undefined,
         dateTo: urlFilters.dateTo || undefined,
         guests: urlFilters.guests > 1 ? urlFilters.guests : undefined,
@@ -97,32 +102,20 @@ export default function Home() {
     void load();
   }, [load]);
 
-  // Live search: typing (or clearing) the city re-runs the search on its
-  // own, without waiting for the Enter/"Найти" submit. Debounced so it
-  // doesn't fire a request per keystroke, and skipped once the input
-  // already matches the URL (e.g. right after the sync effect above, or
-  // after a quick-city tap that updated the URL directly).
-  useEffect(() => {
-    const trimmed = cityInput.trim();
-    if (trimmed === activeCity) return;
-    const timer = window.setTimeout(() => runSearch(trimmed), 350);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cityInput]);
-
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 320);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const runSearch = (city: string, nextFilters: SearchFormState = filters) => {
-    setSearchParams(writeParams({ ...nextFilters, city }));
+  const runSearch = (locality: Locality, nextFilters: SearchFormState = filters) => {
+    setSelectedLocality(locality);
+    setSearchParams(writeParams(nextFilters, locality));
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    runSearch(cityInput.trim());
+    if (selectedLocality) runSearch(selectedLocality);
   };
 
   const activeFilterCount = (filters.guests > 1 ? 1 : 0) + (filters.accommodationType !== "any" ? 1 : 0);
@@ -142,7 +135,7 @@ export default function Home() {
           <Avatar photo={user.photo} name={user.name} size={42} />
           <div>
             <p className={styles.greeting}>Привет, {user.name.split(" ")[0] || "путешественник"} 👋</p>
-            <p className={styles.location}>Ваш город: {user.city}</p>
+            <p className={styles.location}>Ваш город: {user.locality?.shortLabel ?? user.city}</p>
           </div>
         </button>
         <ThemeToggle />
@@ -150,21 +143,28 @@ export default function Home() {
 
       <section className={styles.searchSection}>
         <form className={styles.searchBar} onSubmit={handleSubmit}>
-          <SearchIcon size={18} className={styles.searchIcon} />
-          <input
-            className={styles.searchInput}
-            placeholder="В какой город едете?"
-            value={cityInput}
-            onChange={(event) => setCityInput(event.target.value)}
+          <LocalityCombobox
+            value={selectedLocality}
+            onChange={setSelectedLocality}
+            placeholder="Куда едете?"
+            ariaLabel="Населённый пункт поездки"
+            bare
           />
-          <button type="submit" className={styles.searchSubmit} aria-label="Искать">
+          <button type="submit" className={styles.searchSubmit} aria-label="Искать" disabled={!selectedLocality}>
             Найти
           </button>
         </form>
 
         <div className={styles.quickCities}>
           {quickCities.map((city) => (
-            <Tag key={city} active={city === activeCity} onClick={() => runSearch(city === activeCity ? "" : city)}>
+            <Tag key={city} active={city === selectedLocality?.name} onClick={() => {
+              if (city === selectedLocality?.name) {
+                setSelectedLocality(null);
+                setSearchParams(writeParams(filters, null));
+              } else {
+                void findCity(city).then((locality) => { if (locality) runSearch(locality); });
+              }
+            }}>
               {city}
             </Tag>
           ))}
@@ -180,7 +180,7 @@ export default function Home() {
       <section className={styles.listSection}>
         <div className={styles.listHeading}>
           <h2 className={styles.sectionTitle}>
-            {hasActiveSearch ? `Варианты · ${activeCity}` : "Варианты рядом"}
+            {hasActiveSearch ? `Варианты · ${selectedLocality?.shortLabel ?? "выбранное место"}` : "Варианты рядом"}
           </h2>
           {hasActiveFilters && (
             <p className={styles.resultsStatus}>
@@ -240,8 +240,7 @@ export default function Home() {
         onChange={setFilters}
         onClose={() => setFilterSheetOpen(false)}
         onApply={() => {
-          const city = cityInput.trim() || activeCity;
-          runSearch(city, filters);
+          setSearchParams(writeParams(filters, selectedLocality));
         }}
       />
 

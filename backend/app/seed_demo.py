@@ -9,11 +9,11 @@ import asyncio
 from datetime import date, datetime, timezone
 from uuid import NAMESPACE_URL, UUID, uuid5
 
-from sqlalchemy import delete, or_
+from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.config import Settings
-from app.models import Listing, Notification, Review, Session, StayRequest, User
+from app.models import Listing, Locality, Notification, Review, Session, StayRequest, User
 
 
 def demo_id(kind: str, slug: str) -> UUID:
@@ -96,6 +96,25 @@ async def seed(database_url: str) -> dict[str, int]:
 
     try:
         async with session_factory() as db, db.begin():
+            city_names = {row["city"] for row in USERS} | {row["city"] for row in LISTINGS}
+            locality_rows = (await db.execute(
+                select(Locality).where(Locality.name.in_(city_names), Locality.is_active.is_(True))
+            )).scalars().all()
+            locality_by_name = {}
+            for locality in locality_rows:
+                # Prefer actual cities over an identically named village/settlement.
+                current = locality_by_name.get(locality.name)
+                if current is None or (
+                    locality.type_short.rstrip(".").casefold() == "г"
+                    and current.type_short.rstrip(".").casefold() != "г"
+                ):
+                    locality_by_name[locality.name] = locality
+            missing = sorted(city_names - locality_by_name.keys())
+            if missing:
+                raise RuntimeError(
+                    "Import the official locality snapshot before demo data; missing: " + ", ".join(missing)
+                )
+
             seeded_users = list(user_ids.values())
             seeded_listings = list(listing_ids.values())
             await db.execute(delete(Notification).where(or_(
@@ -115,13 +134,19 @@ async def seed(database_url: str) -> dict[str, int]:
 
             for index, row in enumerate(USERS):
                 values = {key: value for key, value in row.items() if key != "slug"}
+                locality = locality_by_name[row["city"]]
+                values.pop("city")
                 db.add(User(id=user_ids[row["slug"]], max_username=None, photo_url=None,
+                            locality_id=locality.id, city=locality.short_label,
                             created_at=at(20 + index % 7), **values))
             await db.flush()
 
             for index, row in enumerate(LISTINGS):
                 values = {key: value for key, value in row.items() if key not in {"slug", "owner"}}
+                locality = locality_by_name[row["city"]]
+                values["city"] = locality.short_label
                 db.add(Listing(id=listing_ids[row["slug"]], owner_id=user_ids[row["owner"]],
+                               locality_id=locality.id,
                                photo_url=None, created_at=at(22 + index % 5), **values))
             await db.flush()
 

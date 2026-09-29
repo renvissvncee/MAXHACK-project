@@ -8,11 +8,12 @@ from app.config import Settings
 from app.main import create_app
 from tests.auth_helpers import TEST_TOKEN, signed_data as sign
 from tests.test_auth_postgres import database
+from tests.locality_helpers import ensure_localities, locality_id, locality_patch
 
 ORIGIN = {"Origin": "http://localhost:5173"}
 VALID_PHOTO = "data:image/png;base64," + base64.b64encode(b"\x89PNG\r\n\x1a\n0123").decode()
 OFFER = {
-    "city": "Казань", "title": "Комната у Кремля", "shortDescription": "Тихая гостевая комната",
+    "localityId": str(locality_id("Казань")), "title": "Комната у Кремля", "shortDescription": "Тихая гостевая комната",
     "description": "Можно познакомиться с городом, интересы обсудим после матча.",
     "guests": 2, "accommodationType": "room", "availableFrom": "2030-08-01",
     "availableTo": "2030-08-15", "tags": ["центр", "центр"],
@@ -32,15 +33,17 @@ def test_offer_upsert_search_ownership_and_contract(database):
     app = create_app(settings)
     host_id, other_id, viewer_id = (uuid4().int % (2**60) for _ in range(3))
     city = f"Казань-{uuid4().hex[:8]}"
-    host_offer = {**OFFER, "city": city}
+    other_city = f"Тула-{uuid4().hex[:8]}"
+    ensure_localities(database, city, other_city)
+    host_offer = {**OFFER, "localityId": str(locality_id(city))}
     with TestClient(app) as client:
         host = login(client, host_id)
         assert client.get("/api/me/listing").json() == {"listing": None}
         incomplete = client.put("/api/me/listing", headers=ORIGIN, json=host_offer)
         assert incomplete.status_code == 409
-        profile = client.patch("/api/me", headers=ORIGIN, json={
-            "name": "Хозяин", "city": "Москва", "interests": ["История"],
-        })
+        profile = client.patch("/api/me", headers=ORIGIN, json=locality_patch(
+            "Москва", name="Хозяин", interests=["История"],
+        ))
         assert profile.status_code == 200
         created = client.put("/api/me/listing", headers=ORIGIN, json=host_offer)
         assert created.status_code == 200, created.text
@@ -62,10 +65,10 @@ def test_offer_upsert_search_ownership_and_contract(database):
         # A second host publishes a different city and period.
         client.post("/api/auth/logout", headers=ORIGIN)
         login(client, other_id)
-        client.patch("/api/me", headers=ORIGIN, json={
-            "name": "Второй хозяин", "city": "Тула", "interests": ["Архитектура"],
-        })
-        other_offer = {**host_offer, "city": f"Тула-{uuid4().hex[:8]}", "title": "Дом в Туле",
+        client.patch("/api/me", headers=ORIGIN, json=locality_patch(
+            "Тула", name="Второй хозяин", interests=["Архитектура"],
+        ))
+        other_offer = {**host_offer, "localityId": str(locality_id(other_city)), "title": "Дом в Туле",
                        "availableFrom": "2030-09-01", "availableTo": "2030-09-30"}
         assert client.put("/api/me/listing", headers=ORIGIN, json=other_offer).status_code == 200
 
@@ -73,12 +76,12 @@ def test_offer_upsert_search_ownership_and_contract(database):
         client.post("/api/auth/logout", headers=ORIGIN)
         login(client, viewer_id)
         search = client.get("/api/listings", params={
-            "city": city.casefold(), "date_from": "2030-08-10", "date_to": "2030-08-20", "guests": 2,
+            "locality_id": str(locality_id(city)), "date_from": "2030-08-10", "date_to": "2030-08-20", "guests": 2,
         })
         assert search.status_code == 200, search.text
         assert len(search.json()) == 1
         assert search.json()[0]["id"] == first["id"]
-        assert client.get("/api/listings", params={"city": city, "date_from": "2030-08-21",
+        assert client.get("/api/listings", params={"locality_id": str(locality_id(city)), "date_from": "2030-08-21",
                                                      "date_to": "2030-08-22"}).json() == []
         assert client.get("/api/listings", params={"date_from": "2030-08-01"}).status_code == 422
         assert client.get("/api/listings", params={"date_from": "2030-08-10", "date_to": "2030-08-09"}).json()["error"]["code"] == "invalid_date_range"
@@ -97,7 +100,7 @@ def test_photo_validation_and_delete_cascades_requests(database):
     host_id, guest_id = (uuid4().int % (2**60) for _ in range(2))
     with TestClient(app) as client:
         login(client, host_id)
-        client.patch("/api/me", headers=ORIGIN, json={"name": "Хозяин", "city": "Казань", "interests": ["История"]})
+        client.patch("/api/me", headers=ORIGIN, json=locality_patch("Казань", name="Хозяин", interests=["История"]))
 
         bad_photo = client.put("/api/me/listing", headers=ORIGIN, json={**OFFER, "photoUrl": "not-a-data-url"})
         assert bad_photo.status_code == 422
@@ -111,7 +114,7 @@ def test_photo_validation_and_delete_cascades_requests(database):
         # A guest sends a request against the photographed listing.
         client.post("/api/auth/logout", headers=ORIGIN)
         login(client, guest_id)
-        client.patch("/api/me", headers=ORIGIN, json={"name": "Гость", "city": "Москва", "interests": ["Кино"]})
+        client.patch("/api/me", headers=ORIGIN, json=locality_patch("Москва", name="Гость", interests=["Кино"]))
         request = client.post("/api/requests", headers=ORIGIN, json={
             "clientRequestId": str(uuid4()), "listingId": listing_id,
             "dateFrom": OFFER["availableFrom"], "dateTo": OFFER["availableFrom"], "guests": 1,

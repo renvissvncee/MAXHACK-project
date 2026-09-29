@@ -25,7 +25,7 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-["http://localhost:5173","http://localhost:8000"]}'
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-priut}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-priut}
-    command: ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
+    command: ["sh", "-c", "alembic upgrade head && python -m app.import_localities --confirm-official-snapshot && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     depends_on:
@@ -33,6 +33,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/ready', timeout=4)"]
+      start_period: 90s
       interval: 10s
       timeout: 5s
       retries: 3

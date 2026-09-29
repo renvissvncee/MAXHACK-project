@@ -196,6 +196,100 @@
             "application/json":
               "schema":
                 "$ref": "#/components/schemas/ErrorResponse"
+  "/api/localities/suggest":
+    "get":
+      "tags":
+        - "localities"
+      "summary": "Suggest"
+      "operationId": "suggest_api_localities_suggest_get"
+      "parameters":
+        -
+          "name": "q"
+          "in": "query"
+          "required": true
+          "schema":
+            "type": "string"
+            "minLength": 2
+            "maxLength": 120
+            "title": "Q"
+        -
+          "name": "limit"
+          "in": "query"
+          "required": false
+          "schema":
+            "type": "integer"
+            "maximum": 20
+            "minimum": 1
+            "default": 10
+            "title": "Limit"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "type": "array"
+                "items":
+                  "$ref": "#/components/schemas/LocalityResponse"
+                "title": "Response Suggest Api Localities Suggest Get"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
+  "/api/localities/{locality_id}":
+    "get":
+      "tags":
+        - "localities"
+      "summary": "Read Locality"
+      "operationId": "read_locality_api_localities__locality_id__get"
+      "parameters":
+        -
+          "name": "locality_id"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "format": "uuid"
+            "title": "Locality Id"
+      "responses":
+        "200":
+          "description": "Successful Response"
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalityResponse"
+        "401":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unauthorized"
+        "422":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Unprocessable Content"
+        "503":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ErrorResponse"
+          "description": "Service Unavailable"
   "/api/me/listing":
     "get":
       "tags":
@@ -341,18 +435,17 @@
       "operationId": "list_listings_api_listings_get"
       "parameters":
         -
-          "name": "city"
+          "name": "locality_id"
           "in": "query"
           "required": false
           "schema":
             "anyOf":
               -
                 "type": "string"
-                "minLength": 1
-                "maxLength": 120
+                "format": "uuid"
               -
                 "type": "null"
-            "title": "City"
+            "title": "Locality Id"
         -
           "name": "date_from"
           "in": "query"
@@ -1258,6 +1351,12 @@
         "city":
           "type": "string"
           "title": "City"
+        "locality":
+          "anyOf":
+            -
+              "$ref": "#/components/schemas/LocalityResponse"
+            -
+              "type": "null"
         "bio":
           "type": "string"
           "title": "Bio"
@@ -1285,6 +1384,7 @@
         - "id"
         - "name"
         - "city"
+        - "locality"
         - "bio"
         - "interests"
         - "avatarEmoji"
@@ -1293,11 +1393,10 @@
       "title": "HostSummary"
     "ListingInput":
       "properties":
-        "city":
+        "localityId":
           "type": "string"
-          "maxLength": 120
-          "minLength": 1
-          "title": "City"
+          "format": "uuid"
+          "title": "Localityid"
         "title":
           "type": "string"
           "maxLength": 120
@@ -1365,7 +1464,7 @@
       "additionalProperties": false
       "type": "object"
       "required":
-        - "city"
+        - "localityId"
         - "title"
         - "shortDescription"
         - "description"
@@ -1385,6 +1484,20 @@
         "city":
           "type": "string"
           "title": "City"
+        "localityId":
+          "anyOf":
+            -
+              "type": "string"
+              "format": "uuid"
+            -
+              "type": "null"
+          "title": "Localityid"
+        "locality":
+          "anyOf":
+            -
+              "$ref": "#/components/schemas/LocalityResponse"
+            -
+              "type": "null"
         "title":
           "type": "string"
           "title": "Title"
@@ -1444,6 +1557,8 @@
         - "id"
         - "host"
         - "city"
+        - "localityId"
+        - "locality"
         - "title"
         - "shortDescription"
         - "description"
@@ -1458,6 +1573,49 @@
         - "reviewsCount"
         - "photos"
       "title": "ListingResponse"
+    "LocalityResponse":
+      "properties":
+        "id":
+          "type": "string"
+          "format": "uuid"
+          "title": "Id"
+        "name":
+          "type": "string"
+          "title": "Name"
+        "type":
+          "type": "string"
+          "title": "Type"
+        "typeShort":
+          "type": "string"
+          "title": "Typeshort"
+        "region":
+          "type": "string"
+          "title": "Region"
+        "district":
+          "anyOf":
+            -
+              "type": "string"
+            -
+              "type": "null"
+          "title": "District"
+        "shortLabel":
+          "type": "string"
+          "title": "Shortlabel"
+        "fullLabel":
+          "type": "string"
+          "title": "Fulllabel"
+      "additionalProperties": false
+      "type": "object"
+      "required":
+        - "id"
+        - "name"
+        - "type"
+        - "typeShort"
+        - "region"
+        - "district"
+        - "shortLabel"
+        - "fullLabel"
+      "title": "LocalityResponse"
     "LoginRequest":
       "properties":
         "initData":
@@ -1482,6 +1640,20 @@
         "city":
           "type": "string"
           "title": "City"
+        "localityId":
+          "anyOf":
+            -
+              "type": "string"
+              "format": "uuid"
+            -
+              "type": "null"
+          "title": "Localityid"
+        "locality":
+          "anyOf":
+            -
+              "$ref": "#/components/schemas/LocalityResponse"
+            -
+              "type": "null"
         "bio":
           "type": "string"
           "title": "Bio"
@@ -1521,6 +1693,8 @@
         - "id"
         - "name"
         - "city"
+        - "localityId"
+        - "locality"
         - "bio"
         - "interests"
         - "avatarEmoji"
@@ -1620,15 +1794,14 @@
             -
               "type": "null"
           "title": "Name"
-        "city":
+        "localityId":
           "anyOf":
             -
               "type": "string"
-              "maxLength": 120
-              "minLength": 1
+              "format": "uuid"
             -
               "type": "null"
-          "title": "City"
+          "title": "Localityid"
         "bio":
           "anyOf":
             -
@@ -1681,6 +1854,20 @@
         "city":
           "type": "string"
           "title": "City"
+        "localityId":
+          "anyOf":
+            -
+              "type": "string"
+              "format": "uuid"
+            -
+              "type": "null"
+          "title": "Localityid"
+        "locality":
+          "anyOf":
+            -
+              "$ref": "#/components/schemas/LocalityResponse"
+            -
+              "type": "null"
         "bio":
           "type": "string"
           "title": "Bio"
@@ -1715,6 +1902,8 @@
         - "id"
         - "name"
         - "city"
+        - "localityId"
+        - "locality"
         - "bio"
         - "interests"
         - "avatarEmoji"

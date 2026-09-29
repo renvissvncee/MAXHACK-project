@@ -14,6 +14,7 @@ const MAX_IDENTITY_SEED: UserProfile = {
   id: "max-demo-482913",
   name: "Алексей Смирнов",
   city: "",
+  locality: null,
   bio: "",
   interests: [],
   photo: null,

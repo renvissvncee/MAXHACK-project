@@ -1,25 +1,29 @@
 from datetime import date
 from uuid import uuid4
 
-from sqlalchemy import case, delete, func, select
+from sqlalchemy import case, delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.services.reviews import reputation_map
 from app.errors import AppError
 from app.models import Listing, User
 from app.schemas.listings import ListingInput, ListingResponse
+from app.services.localities import require_locality
 
 
 async def save_listing(db, owner: User, data: ListingInput) -> ListingResponse:
-    if not owner.city or not owner.interests:
+    if not owner.locality_id or not owner.interests:
         raise AppError("profile_incomplete", "Сначала заполните профиль: город и интересы.", 409)
     values = data.model_dump()
+    locality = await require_locality(db, values["locality_id"])
+    values["city"] = locality.short_label
     listing_id = uuid4()
     statement = insert(Listing).values(id=listing_id, owner_id=owner.id, **values).on_conflict_do_update(
         index_elements=[Listing.owner_id],
         set_={**values},
     ).returning(Listing)
     listing = (await db.execute(statement)).scalar_one()
+    listing.locality = locality
     await db.commit()
     return await with_reputation(db, listing, owner)
 
@@ -38,22 +42,24 @@ async def delete_my_listing(db, owner: User) -> None:
     await db.commit()
 
 
-async def search_listings(db, viewer: User, city: str | None, date_from: date | None,
+async def search_listings(db, viewer: User, locality_id, date_from: date | None,
                           date_to: date | None, guests: int, accommodation_type: str | None,
                           limit: int, offset: int):
+    if locality_id:
+        await require_locality(db, locality_id)
     statement = select(Listing, User).join(User, User.id == Listing.owner_id).where(
         Listing.owner_id != viewer.id,
         Listing.guests >= guests,
     )
-    if city:
-        statement = statement.where(func.lower(Listing.city) == city.casefold())
+    if locality_id:
+        statement = statement.where(Listing.locality_id == locality_id)
     if accommodation_type:
         statement = statement.where(Listing.accommodation_type == accommodation_type)
     if date_from:
         statement = statement.where(Listing.available_from <= date_from)
     if date_to:
         statement = statement.where(Listing.available_to >= date_to)
-    if city:
+    if locality_id:
         # An explicit city search is already as relevant as it gets — newest first.
         statement = statement.order_by(Listing.created_at.desc(), Listing.id)
     else:
@@ -62,7 +68,7 @@ async def search_listings(db, viewer: User, city: str | None, date_from: date | 
         # relevance we have without real geolocation, so surface those
         # first and fall back to recency within each group.
         statement = statement.order_by(
-            case((func.lower(Listing.city) == (viewer.city or "").casefold(), 0), else_=1),
+            case((Listing.locality_id == viewer.locality_id, 0), else_=1),
             Listing.created_at.desc(), Listing.id,
         )
     statement = statement.limit(limit).offset(offset)

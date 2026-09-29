@@ -1,6 +1,6 @@
 import type { Listing } from "../types/listing";
 
-export const listings: Listing[] = [
+export const listings: Array<Omit<Listing, "localityId" | "locality">> = [
   {
     id: "l1",
     city: "Москва",

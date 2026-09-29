@@ -51,6 +51,12 @@
   box-shadow: var(--shadow-sm);
 }
 
+.searchBar > div {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
 .searchIcon {
   color: var(--color-text-muted);
   flex-shrink: 0;
@@ -80,6 +86,11 @@
   padding: 10px 16px;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.searchSubmit:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .quickCities {

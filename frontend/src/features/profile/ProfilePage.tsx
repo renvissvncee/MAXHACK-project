@@ -27,12 +27,12 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const openEdit = () => {
-    setDraft({ name: user.name, city: user.city, bio: user.bio, interests: user.interests, photo: user.photo });
+    setDraft({ name: user.name, locality: user.locality, bio: user.bio, interests: user.interests, photo: user.photo });
     setEditOpen(true);
   };
 
   const saveEdit = async () => {
-    if (!draft) return;
+    if (!draft?.locality) return;
     try { await updateProfile(draft); setEditOpen(false); showToast("Профиль обновлён"); }
     catch (error) { showToast(error instanceof Error ? error.message : "Ошибка сохранения"); }
   };

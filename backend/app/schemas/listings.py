@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import Field, StringConstraints, model_validator
 
 from app.schemas.profile import Contract
+from app.schemas.localities import LocalityResponse
 
 Text = Annotated[str, StringConstraints(min_length=1, max_length=120)]
 Item = Annotated[str, StringConstraints(min_length=1, max_length=80)]
@@ -19,7 +20,7 @@ PHOTO_URL_PATTERN = re.compile(r"^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/
 
 
 class ListingInput(Contract):
-    city: Text
+    locality_id: UUID
     title: Text
     short_description: str = Field(min_length=1, max_length=240)
     description: str = Field(min_length=1, max_length=4000)
@@ -49,6 +50,7 @@ class HostSummary(Contract):
     id: UUID
     name: str
     city: str
+    locality: LocalityResponse | None
     bio: str
     interests: list[str]
     avatar_emoji: str
@@ -60,6 +62,8 @@ class ListingResponse(Contract):
     id: UUID
     host: HostSummary
     city: str
+    locality_id: UUID | None
+    locality: LocalityResponse | None
     title: str
     short_description: str
     description: str
@@ -80,8 +84,11 @@ class ListingResponse(Contract):
             id=listing.id,
             host=HostSummary(id=host.id, name=host.name, city=host.city, bio=host.bio,
                              interests=host.interests, avatar_emoji=host.avatar_emoji,
-                             avatar_color=host.avatar_color, photo_url=host.photo_url),
-            city=listing.city, title=listing.title, short_description=listing.short_description,
+                             avatar_color=host.avatar_color, photo_url=host.photo_url,
+                             locality=LocalityResponse.from_locality(host.locality) if host.locality else None),
+            city=listing.city, locality_id=listing.locality_id,
+            locality=LocalityResponse.from_locality(listing.locality) if listing.locality else None,
+            title=listing.title, short_description=listing.short_description,
             description=listing.description, guests=listing.guests,
             accommodation_type=listing.accommodation_type, available_from=listing.available_from,
             available_to=listing.available_to, tags=listing.tags, amenities=listing.amenities,

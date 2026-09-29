@@ -38,7 +38,7 @@ async def remove_my_listing(user: CurrentUser, db: DbSession):
 @router.get("/listings", response_model=list[ListingResponse])
 async def list_listings(
     user: CurrentUser, db: DbSession,
-    city: str | None = Query(default=None, min_length=1, max_length=120),
+    locality_id: UUID | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
     guests: int = Query(default=1, ge=1, le=8),
@@ -50,7 +50,7 @@ async def list_listings(
         raise AppError("invalid_date_range", "Укажите обе даты поездки.", 422)
     if date_from and date_to and date_to < date_from:
         raise AppError("invalid_date_range", "Дата окончания должна быть не раньше даты начала.", 422)
-    return await search_listings(db, user, city.strip() if city and city.strip() else None, date_from, date_to,
+    return await search_listings(db, user, locality_id, date_from, date_to,
                                  guests, accommodation_type, limit, offset)
 
 

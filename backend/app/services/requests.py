@@ -4,6 +4,7 @@ from sqlalchemy import select, or_
 from app.errors import AppError
 from app.models import StayRequest, Listing, User
 from app.schemas.listings import HostSummary
+from app.schemas.localities import LocalityResponse
 from app.schemas.requests import RequestInput, RequestResponse, ContactResponse
 
 from app.services.notifications import enqueue
@@ -12,7 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 def public_profile(user):
-    return HostSummary(**{key: getattr(user, key) for key in HostSummary.model_fields})
+    return HostSummary(
+        **{key: getattr(user, key) for key in HostSummary.model_fields if key != "locality"},
+        locality=LocalityResponse.from_locality(user.locality) if user.locality else None,
+    )
 
 
 async def response(db, row):
@@ -34,7 +38,7 @@ async def create_request(db, guest, data):
         result = await response(db, existing)
         await db.commit()
         return result
-    if not guest.city or not guest.interests:
+    if not guest.locality_id or not guest.interests:
         raise AppError("profile_incomplete", "Сначала заполните профиль: город и интересы.", 409)
     offer = (await db.execute(select(Listing).where(Listing.id == data.listing_id).with_for_update())).scalar_one_or_none()
     if offer is None or offer.owner_id == guest.id:

@@ -1,6 +1,7 @@
 import type { UserProfileDraft } from "../../../types/user";
 import InterestChips from "./InterestChips";
 import Avatar from "../../../components/Avatar/Avatar";
+import LocalityCombobox from "../../../components/LocalityCombobox/LocalityCombobox";
 import styles from "./ProfileFields.module.css";
 
 interface ProfileFieldsProps {
@@ -32,17 +33,13 @@ export default function ProfileFields({ value, onChange }: ProfileFieldsProps) {
         />
       </label>
 
-      <label className={styles.field}>
-        <span className={styles.label}>Город</span>
-        <input
-          className={styles.input}
-          type="text"
-          value={value.city}
-          maxLength={40}
-          placeholder="Например, Москва"
-          onChange={(event) => onChange({ ...value, city: event.target.value })}
-        />
-      </label>
+      <LocalityCombobox
+        label="Населённый пункт"
+        value={value.locality}
+        onChange={(locality) => onChange({ ...value, locality })}
+        placeholder="Например, Москва или с. Никольское"
+        required
+      />
 
       <label className={styles.field}>
         <span className={styles.label}>О себе</span>

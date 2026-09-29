@@ -19,6 +19,7 @@ from app.models import Session, User
 from app.services.auth import hash_token
 from tests.auth_helpers import TEST_TOKEN, signed_data as make_signed_data
 from uuid import uuid4
+from tests.locality_helpers import ensure_localities, locality_patch
 
 
 def test_session_cookie_policy_supports_max_web_iframe():
@@ -55,6 +56,7 @@ def database(monkeypatch):
     monkeypatch.setenv('DATABASE_URL', url)
     config = Config('alembic.ini')
     command.upgrade(config, 'head')
+    ensure_localities(url, 'Казань', 'Москва', 'Тула')
     yield url
     # This fixture never drops data. The caller removes the disposable container.
 
@@ -88,7 +90,7 @@ def test_login_profile_isolation_logout_and_expiration(database):
         assert response.headers['cache-control'] == 'no-store'
         assert 'maxUserId' not in response.json() and 'verified' not in response.json()
         first_cookie = client.cookies.get('priut_session')
-        patch = {'name': 'Гость', 'city': 'Казань', 'interests': ['Музыка'], 'avatarColor': 'violet'}
+        patch = locality_patch('Казань', name='Гость', interests=['Музыка'], avatarColor='violet')
         assert client.patch('/api/me', headers={'Origin': 'https://evil.example'}, json=patch).status_code == 403
         response = client.patch('/api/me', headers=origin, json=patch)
         assert response.status_code == 200, response.text
@@ -145,7 +147,7 @@ def test_bearer_session_works_when_embedded_browser_blocks_cookies(database):
         bearer = {**origin, 'Authorization': f'Bearer {token}'}
         assert client.get('/api/me', headers=bearer).status_code == 200
         saved = client.patch('/api/me', headers=bearer,
-                             json={'name': 'Новый гость', 'city': 'Казань', 'interests': ['Музыка']})
+                             json=locality_patch('Казань', name='Новый гость', interests=['Музыка']))
         assert saved.status_code == 200
         assert saved.json()['profileCompleted'] is True
         assert client.post('/api/auth/logout', headers=bearer).status_code == 204

@@ -2,6 +2,7 @@ import type { ListingInput } from "../../../services/listingsService";
 import { accommodationTypeLabels, type AccommodationType } from "../../../types/listing";
 import ChipListInput from "./ChipListInput";
 import ListingPhotoPicker from "./ListingPhotoPicker";
+import LocalityCombobox from "../../../components/LocalityCombobox/LocalityCombobox";
 import styles from "../MyListing.module.css";
 
 interface MyListingFormProps {
@@ -16,17 +17,13 @@ export default function MyListingForm({ draft, onChange }: MyListingFormProps) {
     <div className={styles.form}>
       <ListingPhotoPicker photo={draft.photoUrl} onChange={(photoUrl) => onChange({ ...draft, photoUrl })} />
 
-      <label className={styles.field}>
-        <span className={styles.label}>Город, где вы принимаете гостей</span>
-        <input
-          className={styles.input}
-          required
-          maxLength={120}
-          placeholder="Например, Казань"
-          value={draft.city}
-          onChange={(event) => onChange({ ...draft, city: event.target.value })}
-        />
-      </label>
+      <LocalityCombobox
+        label="Населённый пункт, где вы принимаете гостей"
+        value={draft.locality}
+        onChange={(locality) => onChange({ ...draft, locality })}
+        placeholder="Например, Казань или д. Кудрово"
+        required
+      />
 
       <label className={styles.field}>
         <span className={styles.label}>Название</span>

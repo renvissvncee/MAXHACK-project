@@ -14,6 +14,8 @@ export interface Host {
 export interface Listing {
   id: string;
   city: string;
+  localityId: string | null;
+  locality: Locality | null;
   host: Host;
   photos: string[];
   title: string;
@@ -37,3 +39,4 @@ export const accommodationTypeLabels: Record<AccommodationType, string> = {
   house: "Дом",
   sofa: "Диван / спальное место",
 };
+import type { Locality } from "./locality";

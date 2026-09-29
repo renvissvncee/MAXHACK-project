@@ -9,6 +9,7 @@ from app.schemas.reviews import ReviewInput
 from tests.auth_helpers import TEST_TOKEN
 from tests.test_auth_postgres import database
 from tests.test_listings_postgres import OFFER, ORIGIN, login
+from tests.locality_helpers import locality_patch
 
 
 def test_review_validation():
@@ -26,13 +27,13 @@ def test_reviews_after_match_edit_reputation_and_concurrency(database):
     ids = [uuid4().int % (2**60) for _ in range(3)]
     with TestClient(create_app(settings)) as c:
         host = login(c, ids[0]); hc = dict(c.cookies)
-        c.patch('/api/me', headers=ORIGIN, json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me', headers=ORIGIN, json=locality_patch('Тула', interests=['Кино']))
         offer = c.put('/api/me/listing', headers=ORIGIN, json=OFFER).json()
         url = f"/api/users/{host['id']}"
         assert c.get(url+'/reviews').json() == {'rating': None, 'reviewsCount': 0, 'items': []}
         assert c.put(url+'/review', headers=ORIGIN, json={'rating':5}).status_code == 422
         c.cookies.clear(); guest = login(c, ids[1]); gc = dict(c.cookies)
-        c.patch('/api/me', headers=ORIGIN, json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me', headers=ORIGIN, json=locality_patch('Тула', interests=['Кино']))
         assert c.get(url+'/review').json() is None
         assert c.put(url+'/review', headers=ORIGIN, json={'rating':5}).status_code == 403
         def request():
@@ -85,7 +86,7 @@ def test_reviews_after_match_edit_reputation_and_concurrency(database):
         assert c.get('/api/listings/'+offer['id']).json()['reviewsCount'] == 1
         # A second independent author contributes once to the aggregate.
         c.cookies.clear(); login(c, ids[2]); third_cookie = dict(c.cookies)
-        c.patch('/api/me', headers=ORIGIN, json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me', headers=ORIGIN, json=locality_patch('Тула', interests=['Кино']))
         third_request = c.post('/api/requests', headers=ORIGIN, json={'clientRequestId':str(uuid4()),'listingId':offer['id'],'dateFrom':'2030-08-01','dateTo':'2030-08-02','guests':1}).json()['id']
         c.cookies.clear(); c.cookies.update(hc)
         c.patch('/api/requests/'+third_request, headers=ORIGIN, json={'status':'accepted'})

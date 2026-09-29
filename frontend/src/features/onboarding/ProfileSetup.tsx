@@ -13,14 +13,14 @@ export default function ProfileSetup() {
   const { user, status, completeOnboarding, isSaving } = useUser();
   const { introSeen } = useIntroSeen();
 
-  const [draft, setDraft] = useState<UserProfileDraft>({ name: "", city: "", bio: "", interests: [], photo: null });
+  const [draft, setDraft] = useState<UserProfileDraft>({ name: "", locality: null, bio: "", interests: [], photo: null });
   const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
   const seededFromUser = useRef(false);
 
   useEffect(() => {
     if (user && !seededFromUser.current) {
-      setDraft({ name: user.name, city: user.city, bio: user.bio, interests: user.interests, photo: user.photo });
+      setDraft({ name: user.name, locality: user.locality, bio: user.bio, interests: user.interests, photo: user.photo });
       seededFromUser.current = true;
     }
   }, [user]);
@@ -29,7 +29,7 @@ export default function ProfileSetup() {
   if (!introSeen) return <Navigate to="/" replace />;
   if (user?.onboardingCompleted) return <Navigate to="/home" replace />;
 
-  const isValid = draft.name.trim().length > 0 && draft.city.trim().length > 0 && draft.interests.length > 0;
+  const isValid = draft.name.trim().length > 0 && draft.locality !== null && draft.interests.length > 0;
 
   const handleSubmit = async () => {
     setTouched(true);

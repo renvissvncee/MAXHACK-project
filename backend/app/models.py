@@ -1,13 +1,35 @@
 from datetime import date, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, Index, SmallInteger, String, Text, func
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
     pass
+
+
+class Locality(Base):
+    __tablename__ = "localities"
+    __table_args__ = (
+        Index("ix_localities_search_name", "search_name", postgresql_ops={"search_name": "varchar_pattern_ops"}),
+        Index("ix_localities_name_region", "name", "region_name"),
+    )
+
+    # The canonical FIAS OBJECTGUID is stable and doubles as our public id.
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    object_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    name: Mapped[str] = mapped_column(String(160))
+    type_name: Mapped[str] = mapped_column(String(80))
+    type_short: Mapped[str] = mapped_column(String(24))
+    region_name: Mapped[str] = mapped_column(String(160))
+    district_name: Mapped[str | None] = mapped_column(String(240))
+    short_label: Mapped[str] = mapped_column(String(200))
+    full_label: Mapped[str] = mapped_column(String(500))
+    search_name: Mapped[str] = mapped_column(String(700))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    snapshot_date: Mapped[date] = mapped_column(Date)
 
 
 class User(Base):
@@ -23,6 +45,8 @@ class User(Base):
     interests: Mapped[list[str]] = mapped_column(JSONB, default=list)
     avatar_emoji: Mapped[str] = mapped_column(String(32), default="👤")
     avatar_color: Mapped[str] = mapped_column(String(32), default="violet")
+    locality_id: Mapped[UUID | None] = mapped_column(ForeignKey("localities.id", ondelete="RESTRICT"), index=True)
+    locality: Mapped[Locality | None] = relationship(lazy="selectin")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -41,10 +65,13 @@ class Listing(Base):
         CheckConstraint("available_to >= available_from", name="ck_listings_dates"),
         CheckConstraint("accommodation_type IN ('room', 'apartment', 'house', 'sofa')", name="ck_listings_type"),
         Index("ix_listings_city_dates", "city", "available_from", "available_to"),
+        Index("ix_listings_locality_dates", "locality_id", "available_from", "available_to"),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    locality_id: Mapped[UUID | None] = mapped_column(ForeignKey("localities.id", ondelete="RESTRICT"), index=True)
+    locality: Mapped[Locality | None] = relationship(lazy="selectin")
     city: Mapped[str] = mapped_column(String(120))
     title: Mapped[str] = mapped_column(String(120))
     short_description: Mapped[str] = mapped_column(String(240))

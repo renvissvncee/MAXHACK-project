@@ -14,6 +14,7 @@ from app.workers.notifications import WorkerSettings, claim, finish, deliver_one
 from tests.auth_helpers import TEST_TOKEN
 from tests.test_auth_postgres import database
 from tests.test_listings_postgres import OFFER, ORIGIN, login
+from tests.locality_helpers import locality_patch
 
 
 def test_event_inbox_privacy_and_read_contract(database):
@@ -21,10 +22,10 @@ def test_event_inbox_privacy_and_read_contract(database):
                         allowed_origins=['http://localhost:5173'], _env_file=None)
     with TestClient(create_app(settings)) as c:
         host = login(c, uuid4().int % (2**60)); hc=dict(c.cookies)
-        c.patch('/api/me',headers=ORIGIN,json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me',headers=ORIGIN,json=locality_patch('Тула', interests=['Кино']))
         offer=c.put('/api/me/listing',headers=ORIGIN,json=OFFER).json()
         c.cookies.clear(); login(c,uuid4().int % (2**60)); gc=dict(c.cookies)
-        c.patch('/api/me',headers=ORIGIN,json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me',headers=ORIGIN,json=locality_patch('Тула', interests=['Кино']))
         data={'clientRequestId':str(uuid4()),'listingId':offer['id'],'dateFrom':'2030-08-01','dateTo':'2030-08-02','guests':1}
         request=c.post('/api/requests',headers=ORIGIN,json=data).json()
         c.post('/api/requests',headers=ORIGIN,json=data)
@@ -134,10 +135,10 @@ def test_notification_failure_rolls_back_business_event(database, monkeypatch):
                       allowed_origins=['http://localhost:5173'],_env_file=None)
     with TestClient(create_app(settings)) as c:
         login(c,uuid4().int % (2**60))
-        c.patch('/api/me',headers=ORIGIN,json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me',headers=ORIGIN,json=locality_patch('Тула', interests=['Кино']))
         offer=c.put('/api/me/listing',headers=ORIGIN,json=OFFER).json()
         c.cookies.clear(); login(c,uuid4().int % (2**60))
-        c.patch('/api/me',headers=ORIGIN,json={'city':'Тула','interests':['Кино']})
+        c.patch('/api/me',headers=ORIGIN,json=locality_patch('Тула', interests=['Кино']))
         payload={'clientRequestId':str(uuid4()),'listingId':offer['id'],'dateFrom':'2030-08-01','dateTo':'2030-08-02','guests':1}
         original=service.enqueue
         async def fail(*args):

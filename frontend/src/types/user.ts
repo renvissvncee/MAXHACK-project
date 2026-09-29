@@ -1,8 +1,11 @@
+import type { Locality } from "./locality";
+
 // UI model; ApiUserRepository maps the backend contract into this shape.
 export interface UserProfile {
   id: string;
   name: string;
   city: string;
+  locality: Locality | null;
   bio: string;
   /** Interest ids, see data/interests.ts for the catalog. */
   interests: string[];
@@ -13,7 +16,7 @@ export interface UserProfile {
 }
 
 /** Editable subset of the profile — what the setup/edit forms operate on. */
-export type UserProfileDraft = Pick<UserProfile, "name" | "city" | "bio" | "interests" | "photo">;
+export type UserProfileDraft = Pick<UserProfile, "name" | "locality" | "bio" | "interests" | "photo">;
 
 export interface Interest {
   id: string;

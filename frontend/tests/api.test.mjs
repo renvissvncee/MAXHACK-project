@@ -7,10 +7,13 @@ test('sends session cookies and JSON and decodes the response', async () => {
   globalThis.fetch = async (url, options) => {
     assert.equal(url, '/api/me'); assert.equal(options.credentials, 'include');
     assert.equal(options.headers['Content-Type'], 'application/json');
-    assert.deepEqual(JSON.parse(options.body), { city: 'Казань' });
-    return Response.json({ city: 'Казань' });
+    assert.deepEqual(JSON.parse(options.body), { localityId: 'locality-id' });
+    return Response.json({ localityId: 'locality-id', city: 'Казань' });
   };
-  assert.deepEqual(await api('/api/me', { method: 'PATCH', body: JSON.stringify({ city: 'Казань' }) }), { city: 'Казань' });
+  assert.deepEqual(
+    await api('/api/me', { method: 'PATCH', body: JSON.stringify({ localityId: 'locality-id' }) }),
+    { localityId: 'locality-id', city: 'Казань' },
+  );
 });
 test('uses an in-memory bearer session when embedded cookies are blocked', async () => {
   setSessionToken('browser-independent-session');

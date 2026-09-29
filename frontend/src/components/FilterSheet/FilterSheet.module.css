@@ -55,7 +55,12 @@
 
 .dates {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* A grid track's automatic minimum is its content's own width, not 0 — for
+     a native date input that content width can be wider than half the sheet,
+     so plain `1fr 1fr` let the second field push off the right edge on
+     narrower phones. minmax(0, 1fr) lets the track (and the input inside it)
+     actually shrink to fit. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -63,6 +68,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 600;
@@ -70,6 +76,7 @@
 
 .dates input {
   width: 100%;
+  min-width: 0;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: var(--color-surface);

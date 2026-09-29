@@ -6,6 +6,7 @@ import Button from "../../components/Button/Button";
 import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
 import ReviewSheet from "../../features/reviews/ReviewSheet";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { decideStayRequest, getMatchContact, getStayRequests } from "../../services/requestsService";
 import type { MatchContact, RequestDirection, RequestParty, RequestStatus, StayRequest } from "../../types/request";
 import { pluralRu } from "../../utils/plural";
@@ -35,6 +36,7 @@ export default function Requests() {
   const [contacts, setContacts] = useState<Record<string, MatchContact>>({});
   const [reviewSubject, setReviewSubject] = useState<RequestParty | null>(null);
   const { showToast } = useToast();
+  const showLoading = useDelayedFlag(status === "loading");
 
   const load = useCallback(async () => {
     setStatus("loading");
@@ -110,7 +112,7 @@ export default function Requests() {
         </button>
       </div>
 
-      {status === "loading" && <div className={styles.loading}>Загружаем заявки…</div>}
+      {showLoading && <div className={styles.loading}>Загружаем заявки…</div>}
       {status === "error" && (
         <StateView tone="danger" icon={<Inbox size={28} />} title="Не удалось загрузить"
           description="Проверьте соединение и повторите." actionLabel="Повторить" onAction={() => void load()} />

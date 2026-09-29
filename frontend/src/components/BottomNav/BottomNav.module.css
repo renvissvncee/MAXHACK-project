@@ -9,8 +9,10 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   display: flex;
   align-items: stretch;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-top: 1px solid var(--glass-border);
   box-shadow: 0 -4px 20px rgba(20, 10, 40, 0.06);
   z-index: 100;
 }

@@ -109,6 +109,10 @@ export default function IntroCarousel() {
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!isDragging.current) return;
+    // Belt-and-suspenders alongside `touch-action: none`: some WebViews
+    // (the MAX mobile app's embedded browser in particular) still try to
+    // rubber-band/scroll on a touchmove unless the page also says no here.
+    event.preventDefault();
     let offset = event.clientX - dragStartX.current;
     if ((index === 0 && offset > 0) || (isLast && offset < 0)) {
       offset *= 0.35;

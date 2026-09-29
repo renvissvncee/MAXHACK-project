@@ -18,9 +18,27 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
   overscroll-behavior-y: none;
+  position: relative;
+}
+
+/* Ambient glow sitting behind every screen — two soft blurred blobs pinned
+   to the viewport, fixed so they don't scroll or move on navigation. Screen
+   wrappers (.screen-shell, AppLayout's .shell) are transparent so this shows
+   through the gaps between cards, the way a plain flat --color-bg couldn't. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 40% at 50% -10%, var(--glow-a), transparent 70%),
+    radial-gradient(ellipse 55% 38% at 100% 20%, var(--glow-b), transparent 70%);
 }
 
 #root {
+  position: relative;
+  z-index: 1;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -60,7 +78,8 @@ img {
   min-height: 100dvh;
   display: flex;
   justify-content: center;
-  background: var(--color-bg);
+  position: relative;
+  z-index: 1;
 }
 
 .screen {

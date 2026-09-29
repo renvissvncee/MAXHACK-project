@@ -6,7 +6,14 @@
 .viewport {
   flex: 1;
   overflow: hidden;
-  touch-action: pan-y;
+  /* This screen never scrolls (fixed-height, story-style), so the drag gets
+     full ownership of the gesture from the first pixel. `pan-y` here used to
+     let the browser claim any touch with a vertical component as a native
+     scroll before our JS saw it — real swipes are rarely perfectly
+     horizontal, so that showed up as the drag stalling mid-swipe on phones. */
+  touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-touch-callout: none;
   cursor: grab;
 }
 

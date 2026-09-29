@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { getNotifications, markNotificationRead, notificationDestination } from "../../services/notificationsService";
 import type { AppNotification, NotificationKind, NotificationPage } from "../../types/notification";
 import { pluralRu } from "../../utils/plural";
@@ -24,6 +25,7 @@ export default function Notifications() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const showLoading = useDelayedFlag(!page && !error);
 
   const load = useCallback(async () => {
     setError(false);
@@ -62,7 +64,7 @@ export default function Notifications() {
         <CheckCheck size={17} /> {page.unreadCount} {pluralRu(page.unreadCount, UNREAD_FORMS)}
       </div>
     )}
-    {!page && !error && <p className={styles.loading}>Загружаем уведомления…</p>}
+    {showLoading && <p className={styles.loading}>Загружаем уведомления…</p>}
     {error && <StateView tone="danger" icon={<Bell size={28} />} title="Не удалось загрузить" description="Проверьте соединение." actionLabel="Повторить" onAction={() => void load()} />}
     {page?.items.length === 0 && <StateView icon={<Bell size={28} />} title="Пока тихо" description="Здесь появятся заявки, решения и новые отзывы." />}
     {page && page.items.length > 0 && <div className={styles.list}>{page.items.map((notification) => (

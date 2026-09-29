@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Avatar from "../../components/Avatar/Avatar";
 import StateView from "../../components/StateView/StateView";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { getReviews } from "../../services/reviewsService";
 import type { ReviewPage } from "../../types/review";
 import { pluralRu } from "../../utils/plural";
@@ -15,6 +16,7 @@ export default function Reviews() {
   const navigate = useNavigate();
   const [page, setPage] = useState<ReviewPage | null>(null);
   const [error, setError] = useState(false);
+  const showLoading = useDelayedFlag(!error && !page);
 
   const load = useCallback(() => {
     if (!userId) return;
@@ -43,7 +45,7 @@ export default function Reviews() {
           onAction={load}
         />
       )}
-      {!error && !page && <p className={styles.loading}>Загружаем отзывы…</p>}
+      {showLoading && <p className={styles.loading}>Загружаем отзывы…</p>}
       {page && <>
         <section className={styles.summary}>
           <Star size={24} fill="currentColor" />

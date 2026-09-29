@@ -3,6 +3,7 @@
   text-align: center;
   color: var(--color-text-muted);
   font-size: 13.5px;
+  animation: fadeInUp 0.3s ease;
 }
 
 .form {
@@ -44,6 +45,7 @@
 .input,
 .textarea {
   width: 100%;
+  min-width: 0;
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
@@ -67,7 +69,10 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, 1fr), not plain 1fr — a bare 1fr track won't shrink below its
+     content's own width, and a native date input's content can be wider than
+     half the row, pushing the second field off the screen edge. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -93,6 +98,7 @@
   overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  animation: fadeInUp 0.3s ease;
 }
 
 .summaryPhoto {

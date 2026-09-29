@@ -9,6 +9,8 @@ interface MyListingFormProps {
   onChange: (draft: ListingInput) => void;
 }
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default function MyListingForm({ draft, onChange }: MyListingFormProps) {
   return (
     <div className={styles.form}>
@@ -99,6 +101,7 @@ export default function MyListingForm({ draft, onChange }: MyListingFormProps) {
             className={styles.input}
             type="date"
             required
+            min={today()}
             value={draft.availableFrom}
             onChange={(event) => onChange({ ...draft, availableFrom: event.target.value })}
           />
@@ -109,12 +112,15 @@ export default function MyListingForm({ draft, onChange }: MyListingFormProps) {
             className={styles.input}
             type="date"
             required
-            min={draft.availableFrom || undefined}
+            min={draft.availableFrom || today()}
             value={draft.availableTo}
             onChange={(event) => onChange({ ...draft, availableTo: event.target.value })}
           />
         </label>
       </div>
+      {draft.availableFrom && draft.availableFrom < today() && (
+        <p className={styles.error}>Дата «с» не может быть в прошлом.</p>
+      )}
       {draft.availableFrom && draft.availableTo && draft.availableTo < draft.availableFrom && (
         <p className={styles.error}>Дата «по» не может быть раньше даты «с».</p>
       )}

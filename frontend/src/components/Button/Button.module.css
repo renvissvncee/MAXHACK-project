@@ -38,13 +38,13 @@
 }
 
 .button[data-variant="primary"] {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: #ffffff;
   box-shadow: var(--shadow-sm);
 }
 
 .button[data-variant="primary"]:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  filter: brightness(1.06);
 }
 
 .button[data-variant="secondary"] {

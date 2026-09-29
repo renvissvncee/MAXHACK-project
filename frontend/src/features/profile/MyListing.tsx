@@ -5,6 +5,7 @@ import Button from "../../components/Button/Button";
 import PhotoPlaceholder from "../../components/PhotoPlaceholder/PhotoPlaceholder";
 import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
+import { useDelayedFlag } from "../../hooks/useDelayedFlag";
 import { deleteMyListing, getMyListing, saveMyListing, type ListingInput } from "../../services/listingsService";
 import { accommodationTypeLabels, type Listing } from "../../types/listing";
 import { pluralRu } from "../../utils/plural";
@@ -46,6 +47,7 @@ export default function MyListing() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { showToast } = useToast();
+  const showLoading = useDelayedFlag(status === "loading");
 
   const load = useCallback(async () => {
     setStatus("loading");
@@ -68,6 +70,7 @@ export default function MyListing() {
     draft.description.trim().length > 0 &&
     draft.availableFrom.length > 0 &&
     draft.availableTo.length > 0 &&
+    draft.availableFrom >= new Date().toISOString().slice(0, 10) &&
     draft.availableTo >= draft.availableFrom;
 
   const openCreate = () => {
@@ -111,7 +114,7 @@ export default function MyListing() {
   };
 
   if (status === "loading") {
-    return <p className={styles.loading}>Загружаем ваше предложение…</p>;
+    return showLoading ? <p className={styles.loading}>Загружаем ваше предложение…</p> : null;
   }
 
   if (status === "error") {

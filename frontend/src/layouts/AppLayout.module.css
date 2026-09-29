@@ -2,7 +2,8 @@
   min-height: 100dvh;
   display: flex;
   justify-content: center;
-  background: var(--color-bg);
+  position: relative;
+  z-index: 1;
 }
 
 .page {

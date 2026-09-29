@@ -50,8 +50,11 @@
   /* Ambient background glow (body::before) + glass surfaces (nav, sheet header). */
   --glow-a: rgba(85, 77, 222, 0.14);
   --glow-b: rgba(55, 164, 243, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.5);
+  /* High opacity on purpose: backdrop-filter isn't supported in every MAX
+     WebView, so this has to read as a solid, matte bar on its own — the
+     blur is a bonus for browsers that do support it, not the base look. */
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(20, 16, 79, 0.08);
 
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -106,6 +109,6 @@
 
   --glow-a: rgba(55, 164, 243, 0.18);
   --glow-b: rgba(190, 145, 217, 0.14);
-  --glass-bg: rgba(20, 16, 79, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(15, 12, 56, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }

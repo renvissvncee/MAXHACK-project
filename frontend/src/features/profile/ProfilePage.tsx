@@ -40,7 +40,7 @@ export default function ProfilePage() {
   return (
     <div className={styles.page}>
       <div className={styles.headerCard}>
-        <Avatar photo={user.photo} name={user.name} size={72} />
+        <Avatar photo={user.photo} name={user.name} size={72} className={styles.headerAvatar} />
         <h1 className={styles.name}>{user.name}</h1>
         <p className={styles.city}>{user.city}</p>
         {user.bio && <p className={styles.bio}>{user.bio}</p>}

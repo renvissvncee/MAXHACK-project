@@ -9,7 +9,8 @@ interface PhotoPlaceholderProps {
   iconSize?: number;
 }
 
-const isImageUrl = (value: string) => value.startsWith("http://") || value.startsWith("https://");
+const isImageUrl = (value: string) =>
+  value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/");
 
 export default function PhotoPlaceholder({ variant, className, iconSize = 28 }: PhotoPlaceholderProps) {
   const [failed, setFailed] = useState(false);

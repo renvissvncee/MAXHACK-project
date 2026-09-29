@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.services.reviews import reputation_map
@@ -27,6 +27,15 @@ async def save_listing(db, owner: User, data: ListingInput) -> ListingResponse:
 async def get_my_listing(db, owner: User) -> ListingResponse | None:
     listing = (await db.execute(select(Listing).where(Listing.owner_id == owner.id))).scalar_one_or_none()
     return await with_reputation(db, listing, owner) if listing else None
+
+
+async def delete_my_listing(db, owner: User) -> None:
+    """Hard-delete the owner's listing. Cascades to its stay_requests by FK
+    (ON DELETE CASCADE) — the frontend warns the host about this up front."""
+    result = await db.execute(delete(Listing).where(Listing.owner_id == owner.id).returning(Listing.id))
+    if result.first() is None:
+        raise AppError("listing_not_found", "Предложение не найдено.", 404)
+    await db.commit()
 
 
 async def search_listings(db, viewer: User, city: str | None, date_from: date | None,

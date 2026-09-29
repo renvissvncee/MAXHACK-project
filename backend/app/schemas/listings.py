@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from typing import Annotated
 from uuid import UUID
@@ -8,6 +9,13 @@ from app.schemas.profile import Contract
 
 Text = Annotated[str, StringConstraints(min_length=1, max_length=120)]
 Item = Annotated[str, StringConstraints(min_length=1, max_length=80)]
+
+# No object storage on the deploy host — the photo is a base64 data URL
+# stored directly in Postgres. The frontend resizes/compresses before
+# sending; this cap (~512KB decoded) just guards the server independently
+# of what the client claims to have done.
+PHOTO_URL_MAX_LENGTH = 700_000
+PHOTO_URL_PATTERN = re.compile(r"^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$")
 
 
 class ListingInput(Contract):
@@ -22,6 +30,7 @@ class ListingInput(Contract):
     tags: list[Item] = Field(default_factory=list, max_length=12)
     amenities: list[Item] = Field(default_factory=list, max_length=20)
     rules: list[Item] = Field(default_factory=list, max_length=20)
+    photo_url: str | None = Field(default=None, max_length=PHOTO_URL_MAX_LENGTH)
 
     @model_validator(mode="after")
     def valid_dates_and_dedupe(self):
@@ -29,6 +38,8 @@ class ListingInput(Contract):
             raise ValueError("availableTo must be on or after availableFrom")
         for field in ("tags", "amenities", "rules"):
             setattr(self, field, list(dict.fromkeys(getattr(self, field))))
+        if self.photo_url is not None and not PHOTO_URL_PATTERN.match(self.photo_url):
+            raise ValueError("photoUrl must be a base64 png/jpeg/webp data URL")
         return self
 
 
@@ -72,7 +83,8 @@ class ListingResponse(Contract):
             description=listing.description, guests=listing.guests,
             accommodation_type=listing.accommodation_type, available_from=listing.available_from,
             available_to=listing.available_to, tags=listing.tags, amenities=listing.amenities,
-            rules=listing.rules, rating=None, reviews_count=0, photos=[])
+            rules=listing.rules, rating=None, reviews_count=0,
+            photos=[listing.photo_url] if listing.photo_url else [])
 
 
 class MyListingResponse(Contract):

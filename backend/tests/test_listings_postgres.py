@@ -1,3 +1,4 @@
+import base64
 from datetime import date
 from uuid import uuid4
 
@@ -9,6 +10,7 @@ from tests.auth_helpers import TEST_TOKEN, signed_data as sign
 from tests.test_auth_postgres import database
 
 ORIGIN = {"Origin": "http://localhost:5173"}
+VALID_PHOTO = "data:image/png;base64," + base64.b64encode(b"\x89PNG\r\n\x1a\n0123").decode()
 OFFER = {
     "city": "Казань", "title": "Комната у Кремля", "shortDescription": "Тихая гостевая комната",
     "description": "Можно познакомиться с городом, интересы обсудим после матча.",
@@ -86,3 +88,44 @@ def test_offer_upsert_search_ownership_and_contract(database):
         client.post("/api/auth/logout", headers=ORIGIN)
         login(client, host_id)
         assert client.get(f"/api/listings/{first['id']}").status_code == 404
+
+
+def test_photo_validation_and_delete_cascades_requests(database):
+    settings = Settings(database_url=database, max_bot_token=TEST_TOKEN,
+                        cookie_secure=False, allowed_origins=["http://localhost:5173"], _env_file=None)
+    app = create_app(settings)
+    host_id, guest_id = (uuid4().int % (2**60) for _ in range(2))
+    with TestClient(app) as client:
+        login(client, host_id)
+        client.patch("/api/me", headers=ORIGIN, json={"name": "Хозяин", "city": "Казань", "interests": ["История"]})
+
+        bad_photo = client.put("/api/me/listing", headers=ORIGIN, json={**OFFER, "photoUrl": "not-a-data-url"})
+        assert bad_photo.status_code == 422
+
+        created = client.put("/api/me/listing", headers=ORIGIN, json={**OFFER, "photoUrl": VALID_PHOTO})
+        assert created.status_code == 200, created.text
+        listing = created.json()
+        assert listing["photos"] == [VALID_PHOTO]
+        listing_id = listing["id"]
+
+        # A guest sends a request against the photographed listing.
+        client.post("/api/auth/logout", headers=ORIGIN)
+        login(client, guest_id)
+        client.patch("/api/me", headers=ORIGIN, json={"name": "Гость", "city": "Москва", "interests": ["Кино"]})
+        request = client.post("/api/requests", headers=ORIGIN, json={
+            "clientRequestId": str(uuid4()), "listingId": listing_id,
+            "dateFrom": OFFER["availableFrom"], "dateTo": OFFER["availableFrom"], "guests": 1,
+        })
+        assert request.status_code == 200, request.text
+        request_id = request.json()["id"]
+
+        # The host hard-deletes the listing; the request against it goes with it.
+        client.post("/api/auth/logout", headers=ORIGIN)
+        login(client, host_id)
+        assert client.delete("/api/me/listing", headers=ORIGIN).status_code == 204
+        assert client.get("/api/me/listing").json() == {"listing": None}
+        assert client.delete("/api/me/listing", headers=ORIGIN).status_code == 404
+
+        client.post("/api/auth/logout", headers=ORIGIN)
+        login(client, guest_id)
+        assert client.get(f"/api/requests/{request_id}").status_code == 404

@@ -85,3 +85,61 @@
     grid-template-columns: 1fr;
   }
 }
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.summaryPhoto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.summaryPhotoInner {
+  width: 100%;
+  height: 100%;
+}
+
+.summaryBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 16px;
+}
+
+.summaryTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.summaryMeta {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.summaryActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.summaryActions > * {
+  flex: 1;
+}
+
+.deleteWarning {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.deleteButton {
+  background: var(--color-danger-soft) !important;
+  color: var(--color-danger) !important;
+}

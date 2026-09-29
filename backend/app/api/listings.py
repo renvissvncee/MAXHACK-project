@@ -8,7 +8,7 @@ from app.db import DbSession
 from app.errors import AppError
 from app.schemas.listings import ListingInput, ListingResponse, MyListingResponse
 from app.schemas.profile import ErrorResponse
-from app.services.listings import get_listing, get_my_listing, save_listing, search_listings
+from app.services.listings import delete_my_listing, get_listing, get_my_listing, save_listing, search_listings
 
 router = APIRouter(prefix="/api", tags=["listings"],
                    responses={401: {"model": ErrorResponse}, 403: {"model": ErrorResponse},
@@ -25,6 +25,14 @@ async def put_my_listing(data: ListingInput, user: CurrentUser, db: DbSession):
 @router.get("/me/listing", response_model=MyListingResponse)
 async def read_my_listing(user: CurrentUser, db: DbSession):
     return MyListingResponse(listing=await get_my_listing(db, user))
+
+
+@router.delete("/me/listing", status_code=204, dependencies=[Depends(check_origin)],
+               responses={404: {"model": ErrorResponse}})
+async def remove_my_listing(user: CurrentUser, db: DbSession):
+    """Hard-delete the offer. Any stay_requests against it are cascaded away
+    at the database level — the host is warned about this client-side."""
+    await delete_my_listing(db, user)
 
 
 @router.get("/listings", response_model=list[ListingResponse])

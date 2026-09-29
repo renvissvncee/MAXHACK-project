@@ -1,14 +1,19 @@
-import { AlertTriangle, Home } from "lucide-react";
+import { AlertTriangle, Home, PenSquare, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import BottomSheet from "../../components/BottomSheet/BottomSheet";
 import Button from "../../components/Button/Button";
+import PhotoPlaceholder from "../../components/PhotoPlaceholder/PhotoPlaceholder";
 import StateView from "../../components/StateView/StateView";
 import { useToast } from "../../context/ToastContext";
-import { getMyListing, saveMyListing, type ListingInput } from "../../services/listingsService";
-import { accommodationTypeLabels, type AccommodationType } from "../../types/listing";
-import ChipListInput from "./components/ChipListInput";
+import { deleteMyListing, getMyListing, saveMyListing, type ListingInput } from "../../services/listingsService";
+import { accommodationTypeLabels, type Listing } from "../../types/listing";
+import { pluralRu } from "../../utils/plural";
+import MyListingForm from "./components/MyListingForm";
 import styles from "./MyListing.module.css";
 
-const empty: ListingInput = {
+const GUEST_FORMS = ["гость", "гостя", "гостей"] as const;
+
+const emptyDraft: ListingInput = {
   city: "",
   title: "",
   shortDescription: "",
@@ -20,28 +25,32 @@ const empty: ListingInput = {
   tags: [],
   amenities: [],
   rules: [],
+  photoUrl: null,
 };
+
+function toInput(listing: Listing): ListingInput {
+  const { city, title, shortDescription, description, guests, accommodationType,
+    availableFrom, availableTo, tags, amenities, rules } = listing;
+  return { city, title, shortDescription, description, guests, accommodationType,
+    availableFrom, availableTo, tags, amenities, rules, photoUrl: listing.photos[0] ?? null };
+}
 
 type Status = "loading" | "ready" | "error";
 
 export default function MyListing() {
   const [status, setStatus] = useState<Status>("loading");
-  const [draft, setDraft] = useState<ListingInput>(empty);
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [draft, setDraft] = useState<ListingInput>(emptyDraft);
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { showToast } = useToast();
 
   const load = useCallback(async () => {
     setStatus("loading");
     try {
-      const row = await getMyListing();
-      if (row) {
-        const { city, title, shortDescription, description, guests, accommodationType,
-          availableFrom, availableTo, tags, amenities, rules } = row;
-        setDraft({ city, title, shortDescription, description, guests, accommodationType,
-          availableFrom, availableTo, tags, amenities, rules });
-      } else {
-        setDraft(empty);
-      }
+      setListing(await getMyListing());
       setStatus("ready");
     } catch {
       setStatus("error");
@@ -61,21 +70,43 @@ export default function MyListing() {
     draft.availableTo.length > 0 &&
     draft.availableTo >= draft.availableFrom;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const openCreate = () => {
+    setDraft(emptyDraft);
+    setFormOpen(true);
+  };
+
+  const openEdit = () => {
+    if (!listing) return;
+    setDraft(toInput(listing));
+    setFormOpen(true);
+  };
+
+  const handleSubmit = async () => {
     if (!isValid || saving) return;
     setSaving(true);
     try {
-      const saved = await saveMyListing(draft);
-      const { city, title, shortDescription, description, guests, accommodationType,
-        availableFrom, availableTo, tags, amenities, rules } = saved;
-      setDraft({ city, title, shortDescription, description, guests, accommodationType,
-        availableFrom, availableTo, tags, amenities, rules });
+      setListing(await saveMyListing(draft));
+      setFormOpen(false);
       showToast("Предложение сохранено.");
     } catch (error) {
       showToast(error instanceof Error ? error.message : "Не удалось сохранить предложение.", "info");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await deleteMyListing();
+      setListing(null);
+      setDeleteOpen(false);
+      showToast("Предложение удалено.");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Не удалось удалить предложение.", "info");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -97,141 +128,75 @@ export default function MyListing() {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <p className={styles.hint}>
-        <Home size={15} /> Одно предложение на аккаунт. Оно будет видно другим пользователям в поиске.
-      </p>
-
-      <label className={styles.field}>
-        <span className={styles.label}>Город, где вы принимаете гостей</span>
-        <input
-          className={styles.input}
-          required
-          maxLength={120}
-          placeholder="Например, Казань"
-          value={draft.city}
-          onChange={(event) => setDraft({ ...draft, city: event.target.value })}
+    <>
+      {listing ? (
+        <article className={styles.summaryCard}>
+          <div className={styles.summaryPhoto}>
+            <PhotoPlaceholder variant={listing.photos[0]} className={styles.summaryPhotoInner} />
+          </div>
+          <div className={styles.summaryBody}>
+            <h3 className={styles.summaryTitle}>{listing.title}</h3>
+            <p className={styles.summaryMeta}>{listing.city}</p>
+            <p className={styles.summaryMeta}>
+              {accommodationTypeLabels[listing.accommodationType]} · {listing.guests}{" "}
+              {pluralRu(listing.guests, GUEST_FORMS)} · {listing.availableDates}
+            </p>
+            <div className={styles.summaryActions}>
+              <Button variant="outline" size="md" icon={<PenSquare size={15} />} onClick={openEdit}>
+                Редактировать
+              </Button>
+              <Button variant="ghost" size="md" icon={<Trash2 size={15} />} onClick={() => setDeleteOpen(true)}>
+                Удалить
+              </Button>
+            </div>
+          </div>
+        </article>
+      ) : (
+        <StateView
+          icon={<Home size={26} strokeWidth={1.6} />}
+          title="У вас пока нет размещения"
+          description="Создайте предложение, чтобы гости видели вас в поиске."
+          actionLabel="Создать предложение"
+          onAction={openCreate}
         />
-      </label>
-
-      <label className={styles.field}>
-        <span className={styles.label}>Название</span>
-        <input
-          className={styles.input}
-          required
-          maxLength={120}
-          placeholder="Например, Уютная комната рядом с центром"
-          value={draft.title}
-          onChange={(event) => setDraft({ ...draft, title: event.target.value })}
-        />
-      </label>
-
-      <label className={styles.field}>
-        <span className={styles.label}>Коротко</span>
-        <input
-          className={styles.input}
-          required
-          maxLength={240}
-          placeholder="Например, отдельная комната, до центра 15 минут пешком"
-          value={draft.shortDescription}
-          onChange={(event) => setDraft({ ...draft, shortDescription: event.target.value })}
-        />
-      </label>
-
-      <label className={styles.field}>
-        <span className={styles.label}>Описание</span>
-        <textarea
-          className={styles.textarea}
-          required
-          rows={4}
-          maxLength={4000}
-          placeholder="Расскажите про жильё и условия проживания"
-          value={draft.description}
-          onChange={(event) => setDraft({ ...draft, description: event.target.value })}
-        />
-      </label>
-
-      <div className={styles.row}>
-        <label className={styles.field}>
-          <span className={styles.label}>Гостей</span>
-          <input
-            className={styles.input}
-            type="number"
-            min={1}
-            max={8}
-            required
-            value={draft.guests}
-            onChange={(event) => setDraft({ ...draft, guests: Number(event.target.value) })}
-          />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>Тип размещения</span>
-          <select
-            className={styles.input}
-            value={draft.accommodationType}
-            onChange={(event) => setDraft({ ...draft, accommodationType: event.target.value as AccommodationType })}
-          >
-            {Object.entries(accommodationTypeLabels).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className={styles.row}>
-        <label className={styles.field}>
-          <span className={styles.label}>Доступно с</span>
-          <input
-            className={styles.input}
-            type="date"
-            required
-            value={draft.availableFrom}
-            onChange={(event) => setDraft({ ...draft, availableFrom: event.target.value })}
-          />
-        </label>
-        <label className={styles.field}>
-          <span className={styles.label}>Доступно по</span>
-          <input
-            className={styles.input}
-            type="date"
-            required
-            min={draft.availableFrom || undefined}
-            value={draft.availableTo}
-            onChange={(event) => setDraft({ ...draft, availableTo: event.target.value })}
-          />
-        </label>
-      </div>
-      {draft.availableFrom && draft.availableTo && draft.availableTo < draft.availableFrom && (
-        <p className={styles.error}>Дата «по» не может быть раньше даты «с».</p>
       )}
 
-      <ChipListInput
-        label="Теги"
-        values={draft.tags}
-        onChange={(tags) => setDraft({ ...draft, tags })}
-        placeholder="Например, центр"
-        maxItems={12}
-      />
-      <ChipListInput
-        label="Удобства"
-        values={draft.amenities}
-        onChange={(amenities) => setDraft({ ...draft, amenities })}
-        placeholder="Например, Wi-Fi"
-        maxItems={20}
-      />
-      <ChipListInput
-        label="Правила"
-        values={draft.rules}
-        onChange={(rules) => setDraft({ ...draft, rules })}
-        placeholder="Например, не курить"
-        maxItems={20}
-      />
+      <BottomSheet
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        title={listing ? "Редактировать предложение" : "Новое предложение"}
+        footer={
+          <Button size="lg" fullWidth loading={saving} disabled={!isValid} onClick={handleSubmit}>
+            Сохранить предложение
+          </Button>
+        }
+      >
+        <MyListingForm draft={draft} onChange={setDraft} />
+      </BottomSheet>
 
-      <Button type="submit" size="lg" fullWidth loading={saving} disabled={!isValid}>
-        Сохранить предложение
-      </Button>
-    </form>
+      <BottomSheet
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="Удалить предложение?"
+        footer={
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            className={styles.deleteButton}
+            loading={deleting}
+            onClick={handleDelete}
+          >
+            <Trash2 size={16} style={{ marginRight: 6 }} />
+            Удалить безвозвратно
+          </Button>
+        }
+      >
+        <p className={styles.deleteWarning}>
+          Предложение «{listing?.title}» будет удалено безвозвратно. Все заявки гостей на это
+          размещение — включая уже принятые — тоже будут удалены и станут недоступны.
+        </p>
+      </BottomSheet>
+    </>
   );
 }

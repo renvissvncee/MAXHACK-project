@@ -469,6 +469,79 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Remove My Listing",
+        "description": "Hard-delete the offer. Any stay_requests against it are cascaded away\nat the database level — the host is warned about this client-side.",
+        "operationId": "remove_my_listing_api_me_listing_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/listings": {
@@ -2001,6 +2074,18 @@
             "type": "array",
             "maxItems": 20,
             "title": "Rules"
+          },
+          "photoUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 700000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photourl"
           }
         },
         "additionalProperties": false,

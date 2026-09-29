@@ -56,6 +56,10 @@ class Listing(Base):
     tags: Mapped[list[str]] = mapped_column(JSONB, default=list)
     amenities: Mapped[list[str]] = mapped_column(JSONB, default=list)
     rules: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    # A single photo stored as a base64 data URL — there is no object
+    # storage on the deploy host, only Postgres, and the size is capped in
+    # ListingInput (see schemas/listings.py) to keep rows reasonable.
+    photo_url: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -73,7 +77,9 @@ class StayRequest(Base):
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     client_request_id: Mapped[UUID] = mapped_column()
-    listing_id: Mapped[UUID] = mapped_column(ForeignKey("listings.id", ondelete="RESTRICT"))
+    # CASCADE, not RESTRICT: the host can hard-delete their listing, and the
+    # frontend warns them up front that any requests against it go with it.
+    listing_id: Mapped[UUID] = mapped_column(ForeignKey("listings.id", ondelete="CASCADE"))
     guest_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     host_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     date_from: Mapped[date] = mapped_column(Date)

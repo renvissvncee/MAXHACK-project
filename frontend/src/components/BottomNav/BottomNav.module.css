@@ -2,10 +2,18 @@
   position: fixed;
   left: 50%;
   bottom: 0;
-  transform: translateX(-50%);
-  width: 100%;
+  transform: translateX(-50%); 
+  width: 100%;  
   max-width: var(--page-max-width);
+  /* 
+  height: var(--nav-height);;
+  */
   height: var(--nav-height);
+  /* вот это добавил */
+  min-height: var(--nav-height);
+  /* вот это тоже добавил */
+  box-sizing: border-box;
+
   padding-bottom: env(safe-area-inset-bottom, 0px);
   display: flex;
   align-items: stretch;

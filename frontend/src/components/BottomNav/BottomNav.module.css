@@ -35,6 +35,15 @@
   padding: 6px 4px;
 }
 
+.item svg,
+.item img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: block;
+  line-height: 1;
+}
+
 .badge {
   position: absolute;
   top: 2px;

@@ -6,9 +6,9 @@
   width: 100%;  
   max-width: var(--page-max-width);
   /* 
-  height: var(--nav-height);;
-  */
   height: var(--nav-height);
+  */
+  height: auto;
   /* вот это добавил */
   min-height: var(--nav-height);
   /* вот это тоже добавил */

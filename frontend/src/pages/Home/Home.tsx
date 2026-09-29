@@ -164,7 +164,7 @@ export default function Home() {
 
         <div className={styles.quickCities}>
           {quickCities.map((city) => (
-            <Tag key={city} active={city === activeCity} onClick={() => runSearch(city)}>
+            <Tag key={city} active={city === activeCity} onClick={() => runSearch(city === activeCity ? "" : city)}>
               {city}
             </Tag>
           ))}

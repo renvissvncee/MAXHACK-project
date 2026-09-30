@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Export deterministic JSON and YAML OpenAPI artifacts without contacting the DB."""
+"""Export the deterministic OpenAPI artifact without contacting the DB.
+
+DATA-API.yaml is a separate API Judge 1.0 scenario and must not be generated
+from the OpenAPI document.
+"""
 import argparse
 import json
 import os
@@ -13,51 +17,10 @@ os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://unused:unused@localh
 from app.main import create_app  # noqa: E402
 
 
-def yaml_scalar(value):
-    if value is None:
-        return "null"
-    if value is True:
-        return "true"
-    if value is False:
-        return "false"
-    if isinstance(value, (int, float)):
-        return str(value)
-    return json.dumps(value, ensure_ascii=False)
-
-
-def yaml_dump(value, indent=0):
-    prefix = " " * indent
-    if isinstance(value, dict):
-        if not value:
-            return "{}"
-        lines = []
-        for key, child in value.items():
-            rendered_key = yaml_scalar(str(key))
-            if isinstance(child, (dict, list)) and child:
-                lines.append(f"{prefix}{rendered_key}:")
-                lines.append(yaml_dump(child, indent + 2))
-            else:
-                lines.append(f"{prefix}{rendered_key}: {yaml_dump(child, 0)}")
-        return "\n".join(lines)
-    if isinstance(value, list):
-        if not value:
-            return "[]"
-        lines = []
-        for child in value:
-            if isinstance(child, (dict, list)) and child:
-                lines.append(f"{prefix}-")
-                lines.append(yaml_dump(child, indent + 2))
-            else:
-                lines.append(f"{prefix}- {yaml_dump(child, 0)}")
-        return "\n".join(lines)
-    return yaml_scalar(value)
-
-
 def rendered_artifacts():
     schema = create_app().openapi()
     return {
         ROOT / "docs" / "openapi.json": json.dumps(schema, ensure_ascii=False, indent=2) + "\n",
-        ROOT / "DATA-API.yaml": yaml_dump(schema) + "\n",
     }
 
 

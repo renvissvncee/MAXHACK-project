@@ -60,9 +60,9 @@ docker compose -f compose.yaml -f compose.full.yaml down
 
 Без `-v` данные БД и курсор сохраняются. При сбое polling смотрите logs bot; автоматического бесконечного перезапуска при неправильном токене нет.
 
-## TLS бота в Docker на macOS
+## TLS клиентов MAX в Docker на macOS
 
-Установка сертификата в Keychain macOS не обновляет доверенные CA внутри Linux-контейнера. Если локальный бот работает, а контейнер пишет `tls_certificate_untrusted`, подключите уже проверенные CA через read-only каталог `.certs/`. Не отключайте TLS-проверку.
+Установка сертификата в Keychain macOS не обновляет доверенные CA внутри Linux-контейнера. Если локальный клиент MAX работает, а `backend`, `bot` или `notifications` пишет `tls_certificate_untrusted`, подключите уже проверенные CA через read-only каталог `.certs/`. Не отключайте TLS-проверку.
 
 Для CA MAX, уже установленных в `/Library/Keychains/System.keychain`, из корня проекта:
 
@@ -72,14 +72,15 @@ security find-certificate -c 'Russian Trusted Root CA' -p /Library/Keychains/Sys
 security find-certificate -c 'Russian Trusted Sub CA' -p /Library/Keychains/System.keychain >> .certs/max-ca.pem
 ```
 
-В корневом `.env` задайте `MAX_CA_FILE=/run/max-certs/max-ca.pem`. Это путь внутри контейнера; Compose монтирует локальный `.certs` в `/run/max-certs` только для чтения. Сертификаты публичные, закрытые ключи не экспортируются. Каталог исключён из Git. На другом компьютере/сервере файл нужно подготовить отдельно из проверенного источника; он не запекается в Docker image. Без MAX_CA_FILE бот использует стандартный Linux bundle `/etc/ssl/certs/ca-certificates.crt`.
+В корневом `.env` задайте `MAX_CA_FILE=/run/max-certs/max-ca.pem`. Это путь внутри контейнера; Compose монтирует локальный `.certs` в `/run/max-certs` только для чтения. Переменная и mount подключены к `backend`, `bot` и `notifications`, поэтому один bundle работает и для HTTP-кнопки контакта, и для фоновых процессов. Сертификаты публичные, закрытые ключи не экспортируются. Каталог исключён из Git. На другом компьютере/сервере файл нужно подготовить отдельно из проверенного источника; он не запекается в Docker image. Без `MAX_CA_FILE` клиенты MAX используют стандартный Linux bundle `/etc/ssl/certs/ca-certificates.crt`.
 
 Проверка и применение:
 
 ```sh
 docker compose -f compose.yaml -f compose.full.yaml run --rm --no-deps bot python -m app.max_bot.polling --check
-docker compose -f compose.yaml -f compose.full.yaml up -d bot
-docker compose -f compose.yaml -f compose.full.yaml logs --tail=30 bot
+docker compose -f compose.yaml -f compose.full.yaml up -d --force-recreate backend bot notifications
+docker compose -f compose.yaml -f compose.full.yaml exec backend python -m app.max_bot.polling --check
+docker compose -f compose.yaml -f compose.full.yaml logs --tail=30 backend bot notifications
 ```
 
 `--check` вызывает только GET /me и /subscriptions. Успех: `max_connection_ok`. После перезапуска отправьте `/start` вручную. Обычная команда полного запуска остаётся прежней. Надпись Docker `Started` означает только старт процесса: при ошибке он может сразу завершиться; проверяйте `ps -a` и логи.

@@ -12,4 +12,6 @@ class Settings(BaseSettings):
     init_data_max_age_seconds: int = Field(default=3600, ge=60, le=86400)
     session_ttl_seconds: int = Field(default=86400, ge=60, le=604800)
     cookie_secure: bool = True
-    allowed_origins: list[str] = ["http://localhost:5173", "http://localhost:8000"]
+    allowed_origins: list[str] = [
+        "http://localhost:5173", "http://localhost:8000", "http://localhost:8080",
+    ]

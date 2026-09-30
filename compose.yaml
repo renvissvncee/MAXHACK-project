@@ -14,6 +14,7 @@ services:
       timeout: 3s
       retries: 10
   backend:
+    image: priut-backend:local
     build: ./backend
     restart: unless-stopped
     env_file:
@@ -23,19 +24,72 @@ services:
         required: false
     environment:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-["http://localhost:5173","http://localhost:8000"]}'
+      ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-["http://localhost:5173","http://localhost:8000","http://localhost:8080"]}'
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-priut}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-priut}
-    command: ["sh", "-c", "alembic upgrade head && python -m app.import_localities --confirm-official-snapshot && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
+      SSL_CERT_FILE: ${MAX_CA_FILE:-/etc/ssl/certs/ca-certificates.crt}
+    command: ["sh", "-c", "alembic upgrade head && python -m app.import_localities --confirm-official-snapshot && python -m app.seed_demo --confirm-test-data && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./.certs:/run/max-certs:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/ready', timeout=4)"]
       start_period: 90s
       interval: 10s
       timeout: 5s
       retries: 3
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  bot:
+    image: priut-backend:local
+    restart: on-failure
+    env_file:
+      - path: ./.env
+        required: false
+      - path: ./backend/.env
+        required: false
+    environment:
+      SSL_CERT_FILE: ${MAX_CA_FILE:-/etc/ssl/certs/ca-certificates.crt}
+      MAX_POLLING_CURSOR_FILE: /home/appuser/.state/max-marker.json
+    command: ["python", "-m", "app.max_bot.polling"]
+    volumes:
+      - bot_state:/home/appuser/.state
+      - ./.certs:/run/max-certs:ro
+    depends_on:
+      web:
+        condition: service_healthy
+  notifications:
+    image: priut-backend:local
+    restart: on-failure
+    env_file:
+      - path: ./.env
+        required: false
+      - path: ./backend/.env
+        required: false
+    environment:
+      SSL_CERT_FILE: ${MAX_CA_FILE:-/etc/ssl/certs/ca-certificates.crt}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-priut}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-priut}
+      NOTIFICATION_DELIVERY_ENABLED: ${NOTIFICATION_DELIVERY_ENABLED:-false}
+    command: ["python", "-m", "app.workers.notifications"]
+    volumes:
+      - ./.certs:/run/max-certs:ro
+    depends_on:
+      backend:
+        condition: service_healthy
 volumes:
   postgres_data:
+  bot_state:

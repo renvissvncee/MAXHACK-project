@@ -144,7 +144,7 @@ GET `/api/listings` ищет только предложения других п
 
 Полный локальный запуск: `docker compose -f compose.yaml -f compose.full.yaml up --build -d`. Перед запуском остановите ручной polling. Подробности портов, HTTPS, cookies и остановки: [local-integration.md](../docs/local-integration.md).
 
-Для Docker сертификаты macOS автоматически недоступны. Полный Compose поддерживает `MAX_CA_FILE` в корневом `.env` и read-only mount `.certs` → `/run/max-certs`. Инструкция экспорта уже установленных CA и проверки `--check`: [TLS в Docker](../docs/local-integration.md#tls-бота-в-docker-на-macos). Проверка TLS остаётся включённой.
+Для Docker сертификаты macOS автоматически недоступны. Compose поддерживает `MAX_CA_FILE` в корневом `.env` и read-only mount `.certs` → `/run/max-certs` для `backend`, `bot` и `notifications`. Инструкция экспорта уже установленных CA и проверки `--check`: [TLS в Docker](../docs/local-integration.md#tls-клиентов-max-в-docker-на-macos). Проверка TLS остаётся включённой.
 
 ## Этап 6б — лента уведомлений и MAX delivery worker
 
